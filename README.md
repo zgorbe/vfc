@@ -1,6 +1,6 @@
 # Vue Firebase Chess
 
-> A Vue.js project available on https://fire-chess-d2f51.firebaseapp.com/
+> A Vue.js project available on https://fire-chess-d2f51.firebaseapp.com/. Chess engine is not implemented, it's a simple online chess board.
 
 ## Build Setup
 

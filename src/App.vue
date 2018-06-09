@@ -141,10 +141,12 @@ export default {
 
     &.whites {
       align-content: flex-start;
+      align-items: flex-start
     }
 
     &.blacks {
       align-content: flex-end;
+      align-items: flex-end;
     }
 
     .figure {
