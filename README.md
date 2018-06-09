@@ -1,6 +1,6 @@
-# vfc
+# Vue Firebase Chess
 
-> A Vue.js project
+> A Vue.js project available on https://fire-chess-d2f51.firebaseapp.com/
 
 ## Build Setup
 
