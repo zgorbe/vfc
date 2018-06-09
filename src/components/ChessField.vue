@@ -1,10 +1,9 @@
 <template>
-    <div class="figure" v-on:click="select" 
+    <div class="field" v-on:click="select" 
         v-bind:class="{ 'selected' : isSelected(selected), 
             'vb': figure == 'B', 'vh': figure == 'H', 'vf': figure == 'F', 'vk': figure == 'K', 'vv': figure == 'V', 'vp': figure == 'P',
             'fb': figure == 'b', 'fh': figure == 'h', 'ff': figure == 'f', 'fk': figure == 'k', 'fv': figure == 'v', 'fp': figure == 'p'
         }">
-        
     </div>
 </template>
 
@@ -91,51 +90,11 @@ export default {
 </script>
 
 <style lang="scss">
-
-.figure {
-    background-size: cover;
-    height: 60px;
-    width: 60px;
-    &.selected {
-        background-color: rgb(240, 78, 78);
+$image-list: 'fb', 'fh', 'ff', 'fk', 'fv', 'fp', 'vb', 'vh', 'vf', 'vk', 'vv', 'vp';
+@each $image in $image-list {
+    .#{$image} {
+        background-image: url(../assets/#{$image}.svg);
+        cursor: pointer;
     }
-}
-
-.fb {
-    background-image: url(../assets/br.svg);
-}
-.fh {
-    background-image: url(../assets/bn.svg);
-}
-.ff {
-    background-image: url(../assets/bb.svg);
-}
-.fk {
-    background-image: url(../assets/bk.svg);
-}
-.fv {
-    background-image: url(../assets/bq.svg);
-}
-.fp {
-    background-image: url(../assets/bp.svg);
-}
-
-.vb {
-    background-image: url(../assets/wr.svg);
-}
-.vh {
-    background-image: url(../assets/wn.svg);
-}
-.vf {
-    background-image: url(../assets/wb.svg);
-}
-.vk {
-    background-image: url(../assets/wk.svg);
-}
-.vv {
-    background-image: url(../assets/wq.svg);
-}
-.vp {
-    background-image: url(../assets/wp.svg);
 }
 </style>

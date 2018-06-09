@@ -1,20 +1,27 @@
 <template>
-  <div id="app" class="container">
-    <div class="row">
-      <table class="chess-table col-8">
-        <tr v-for="row in table" v-bind:key="row['.key']">
-          <td v-for="(cell, index) in row['.value']" v-bind:key="index">
-            <chess-field v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" />
-          </td>
-        </tr>
-      </table>
-      <div class="rightPanel col-4">
-        <div class="figure" v-for="figure in deletedWhites" v-bind:key="figure['.key']" v-bind:class="getDeletedFigureCss(figure['.value'])"></div>
-        <br>
-        <div class="figure" v-for="figure in deletedBlacks" v-bind:key="figure['.key']" v-bind:class="getDeletedFigureCss(figure['.value'])"></div>
+  <div id="app">
+    <div v-if="loading" class="loading">
+    </div>
+    <div v-else class="container">
+      <div class="row">
+        <div class="figure-container whites col-2">
+          <div class="figure" v-for="figure in deletedWhites" v-bind:key="figure['.key']" v-bind:class="getDeletedFigureCss(figure['.value'])"></div>
+        </div>
+        <div class="col-8">
+          <div class="chess-table">
+            <template v-for="row in table">
+                <chess-field v-for="(cell, index) in row['.value']" v-bind:key="index + row['.key']" v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" />
+            </template>
+          </div>
+        </div>
+        <div class="figure-container blacks col-2">
+          <div class="figure" v-for="figure in deletedBlacks" v-bind:key="figure['.key']" v-bind:class="getDeletedFigureCss(figure['.value'])"></div>
+        </div>
       </div>
-      <div class="buttons">
-        <button v-on:click="newGame">New Game</button>
+      <div class="row">
+        <div class="buttons col-12">
+          <button class="btn btn-large btn-secondary" v-on:click="newGame">New Game</button>
+        </div>
       </div>
     </div>
   </div>
@@ -28,6 +35,11 @@ import { deletedBlacksRef } from './firebase';
 
 export default {
   name: 'App',
+  data() {
+    return  {
+      loading: true
+    }
+  },
   methods: {
     newGame() {
       tableRef.update({
@@ -66,10 +78,15 @@ export default {
     }
   },
   firebase: {
-    table: tableRef,
+    table: {
+      source: tableRef,
+      readyCallback() {
+        this.loading = false;
+      }
+    },
     selected: selectedRef,
     deletedWhites: deletedWhitesRef,
-    deletedBlacks: deletedBlacksRef
+    deletedBlacks: deletedBlacksRef    
   },
   created: function () {
     selectedRef.update({
@@ -83,36 +100,64 @@ export default {
 
 <style lang="scss">
 #app {
+  margin-top: 20px;
+
   .buttons {
+    display: flex;
+    justify-content: center;
     margin-top: 20px;
   }
 
   .chess-table {
     border: 1px solid black;
-    border-collapse: collapse;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    grid-auto-flow: row;
 
-    td {
-      cursor: pointer;
-      padding: 0;
-      position: relative;
-      text-align: center;
+    .field {
+      background-size: cover;
+      padding-top: 100%;
+      
+      &.selected {
+          background-color: rgb(240, 78, 78) !important;
+      }
+      // TODO: refactor this with using scss
+      &:nth-child(n):nth-child(even):nth-child(-n+8),
+      &:nth-child(n+9):nth-child(odd):nth-child(-n+16),
+      &:nth-child(n+17):nth-child(even):nth-child(-n+24),
+      &:nth-child(n+25):nth-child(odd):nth-child(-n+32),
+      &:nth-child(n+33):nth-child(even):nth-child(-n+40),
+      &:nth-child(n+41):nth-child(odd):nth-child(-n+48),
+      &:nth-child(n+49):nth-child(even):nth-child(-n+56),
+      &:nth-child(n+57):nth-child(odd):nth-child(-n+64) {
+        background-color: #999;
+      }
     }
-
-    tr {
-      margin: 0;
-      padding: 0;
-    }
-
-    tr:nth-child(odd) td:nth-child(even), 
-    tr:nth-child(even) td:nth-child(odd) {
-      background: #999;
-    }
-    
   }
 
-  .rightPanel .figure {
-    display: inline-block;
+  .figure-container {
+    display: flex;
+    flex-wrap: wrap;
+
+    &.whites {
+      align-content: flex-start;
+    }
+
+    &.blacks {
+      align-content: flex-end;
+    }
+
+    .figure {
+      background-size: cover;
+      height: 50px;
+      width: 50px;
+    }
   }
+  .loading {
+    background: url('./assets/loading_spinner.gif') center no-repeat;
+    height: 30vw;
+    width: 100vw;
+  } 
 }
 @import '../node_modules/bootstrap/scss/bootstrap.scss';
 </style>
