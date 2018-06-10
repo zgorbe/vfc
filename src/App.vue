@@ -8,7 +8,7 @@
           <div class="figure" v-for="figure in deletedWhites" v-bind:key="figure['.key']" v-bind:class="getDeletedFigureCss(figure['.value'])"></div>
         </div>
         <div class="col-8">
-          <div class="chess-table">
+          <div class="chess-table clearfix">
             <template v-for="row in table">
                 <chess-field v-for="(cell, index) in row['.value']" v-bind:key="index + row['.key']" v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" />
             </template>
@@ -110,13 +110,17 @@ export default {
 
   .chess-table {
     border: 1px solid black;
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-auto-flow: row;
 
     .field {
       background-size: cover;
-      padding-top: 100%;
+      float: left;
+      width: 12.5%;
+
+      &:before {
+        content: '';
+        display: block;
+        padding: 50% 0;
+      }
       
       &.selected {
           background-color: rgb(240, 78, 78) !important;
