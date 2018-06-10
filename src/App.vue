@@ -99,6 +99,8 @@ export default {
 </script>
 
 <style lang="scss">
+@import '../node_modules/bootstrap/scss/bootstrap.scss';
+
 #app {
   margin-top: 20px;
 
@@ -112,7 +114,10 @@ export default {
     border: 1px solid black;
 
     .field {
-      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 80% 80%;
+
       float: left;
       width: 12.5%;
 
@@ -140,6 +145,8 @@ export default {
   }
 
   .figure-container {
+    $figureSize: 20px;
+    
     display: flex;
     flex-wrap: wrap;
 
@@ -155,9 +162,17 @@ export default {
 
     .figure {
       background-size: cover;
-      height: 50px;
-      width: 50px;
+      height: $figureSize;
+      width: $figureSize;
     }
+
+    @include media-breakpoint-up(md) {
+      $figureSize: 40px;
+      .figure {
+        height: $figureSize;
+        width: $figureSize;
+      }
+    }    
   }
   .loading {
     background: url('./assets/loading_spinner.gif') center no-repeat;
@@ -165,5 +180,4 @@ export default {
     width: 100vw;
   } 
 }
-@import '../node_modules/bootstrap/scss/bootstrap.scss';
 </style>

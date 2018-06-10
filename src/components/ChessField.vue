@@ -23,7 +23,7 @@ export default {
                 figure: { value: figure }
             });
         },
-        updateTable: function(field, figure) {
+        updateTable(field, figure) {
             var self = this;
             return tableRef.child(field.row).once('value').then(function(data) {
                 var row = data.val(),
@@ -31,6 +31,15 @@ export default {
                 
                 return tableRef.child(field.row).set(resultRow);
             });
+        },
+        getFigureColor(figure) {
+            return figure.toUpperCase() == 'X' ? '' : figure.toUpperCase() == figure ? 'white' : 'black';
+        },
+        isValidMove(selectedObj) {
+            var isDifferentFieldSelected = selectedObj.row != this.row || selectedObj.index != this.index,
+                isDifferentColorSelected = this.getFigureColor(selectedObj.figure) != this.getFigureColor(this.figure);
+            
+            return isDifferentFieldSelected && isDifferentColorSelected;
         },
         select() {
             var selectedObj = {};
@@ -43,7 +52,7 @@ export default {
             }
 
             if (selectedObj.figure != 'X') {
-                if (selectedObj.row != this.row || selectedObj.index != this.index) {
+                if (this.isValidMove(selectedObj)) {
                     // move figure
                     this.updateTable(selectedObj, 'X')
                         .then(this.updateTable.bind(this, { 
