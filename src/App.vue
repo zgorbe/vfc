@@ -20,7 +20,7 @@
       </div>
       <div class="row">
         <div class="buttons col-12">
-          <button class="btn btn-large btn-secondary" v-on:click="newGame">New Game</button>
+          <button class="btn btn-secondary" v-on:click="newGame">New Game</button>
         </div>
       </div>
     </div>
@@ -111,7 +111,7 @@ export default {
   }
 
   .chess-table {
-    border: 1px solid black;
+    border: 1vw solid #422;
 
     .field {
       background-position: center;
@@ -128,7 +128,7 @@ export default {
       }
       
       &.selected {
-          background-color: rgb(240, 78, 78) !important;
+          background-color: #755 !important;
       }
       // TODO: refactor this with using scss
       &:nth-child(n):nth-child(even):nth-child(-n+8),
@@ -172,7 +172,15 @@ export default {
         height: $figureSize;
         width: $figureSize;
       }
-    }    
+    }
+
+    @include media-breakpoint-up(lg) {
+      $figureSize: 50px;
+      .figure {
+        height: $figureSize;
+        width: $figureSize;
+      }
+    }
   }
   .loading {
     background: url('./assets/loading_spinner.gif') center no-repeat;

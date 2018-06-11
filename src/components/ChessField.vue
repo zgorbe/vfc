@@ -24,10 +24,8 @@ export default {
             });
         },
         updateTable(field, figure) {
-            var self = this;
-            return tableRef.child(field.row).once('value').then(function(data) {
-                var row = data.val(),
-                    resultRow = self.stringReplaceAt(row, figure, field.index - 1);
+            return tableRef.child(field.row).once('value').then((data) => {
+                var resultRow = this.stringReplaceAt(data.val(), figure, field.index - 1);
                 
                 return tableRef.child(field.row).set(resultRow);
             });
@@ -54,12 +52,13 @@ export default {
             if (selectedObj.figure != 'X') {
                 if (this.isValidMove(selectedObj)) {
                     // move figure
-                    this.updateTable(selectedObj, 'X')
-                        .then(this.updateTable.bind(this, { 
-                                row: this.row,
-                                index: this.index,
-                                figure: this.figure
-                            }, selectedObj.figure));
+                    this.updateTable(selectedObj, 'X').then(() =>  { 
+                        this.updateTable({
+                            row: this.row,
+                            index: this.index,
+                            figure: this.figure
+                        }, selectedObj.figure);
+                    });
                     // delete a figure
                     if (this.figure != 'X') {
                         if (this.figure.toUpperCase() != this.figure) {
