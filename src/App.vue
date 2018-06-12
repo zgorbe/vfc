@@ -5,17 +5,13 @@
     <div v-else class="container">
       <div class="row">
         <div class="figure-container whites col-2">
-          <div class="figure" v-for="figure in deletedWhites" v-bind:key="figure['.key']" v-bind:class="getDeletedFigureCss(figure['.value'])"></div>
+          <div class="figure" v-for="figure in deletedWhites" v-bind:key="figure['.key']" v-bind:class="getFigureCss(figure['.value'])"></div>
         </div>
         <div class="col-8">
-          <div class="chess-table clearfix">
-            <template v-for="row in table">
-                <chess-field v-for="(cell, index) in row['.value']" v-bind:key="index + row['.key']" v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" />
-            </template>
-          </div>
+          <chess-table v-bind="{getFigureCss}"></chess-table>
         </div>
         <div class="figure-container blacks col-2">
-          <div class="figure" v-for="figure in deletedBlacks" v-bind:key="figure['.key']" v-bind:class="getDeletedFigureCss(figure['.value'])"></div>
+          <div class="figure" v-for="figure in deletedBlacks" v-bind:key="figure['.key']" v-bind:class="getFigureCss(figure['.value'])"></div>
         </div>
       </div>
       <div class="row">
@@ -60,7 +56,7 @@ export default {
       deletedBlacksRef.set({});
       deletedWhitesRef.set({});
     },
-    getDeletedFigureCss(figure) {
+    getFigureCss(figure) {
       return {
         'vb': figure == 'B',
         'vh': figure == 'H',
@@ -84,7 +80,6 @@ export default {
         this.loading = false;
       }
     },
-    selected: selectedRef,
     deletedWhites: deletedWhitesRef,
     deletedBlacks: deletedBlacksRef    
   },
@@ -108,40 +103,6 @@ export default {
     display: flex;
     justify-content: center;
     margin-top: 20px;
-  }
-
-  .chess-table {
-    border: 1vw solid #422;
-
-    .field {
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 80% 80%;
-
-      float: left;
-      width: 12.5%;
-
-      &:before {
-        content: '';
-        display: block;
-        padding: 50% 0;
-      }
-      
-      &.selected {
-          background-color: #755 !important;
-      }
-      // TODO: refactor this with using scss
-      &:nth-child(n):nth-child(even):nth-child(-n+8),
-      &:nth-child(n+9):nth-child(odd):nth-child(-n+16),
-      &:nth-child(n+17):nth-child(even):nth-child(-n+24),
-      &:nth-child(n+25):nth-child(odd):nth-child(-n+32),
-      &:nth-child(n+33):nth-child(even):nth-child(-n+40),
-      &:nth-child(n+41):nth-child(odd):nth-child(-n+48),
-      &:nth-child(n+49):nth-child(even):nth-child(-n+56),
-      &:nth-child(n+57):nth-child(odd):nth-child(-n+64) {
-        background-color: #999;
-      }
-    }
   }
 
   .figure-container {

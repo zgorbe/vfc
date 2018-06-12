@@ -2,6 +2,7 @@
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue';
 import App from './App';
+import ChessTable from './components/ChessTable.vue';
 import ChessField from './components/ChessField.vue';
 
 import './firebase';
@@ -11,6 +12,7 @@ Vue.config.productionTip = false;
 
 Vue.use(VueFire);
 
+Vue.component('chess-table', ChessTable);
 Vue.component('chess-field', ChessField);
 
 Vue.mixin({

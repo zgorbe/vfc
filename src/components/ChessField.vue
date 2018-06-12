@@ -1,9 +1,6 @@
 <template>
     <div class="field" v-on:click="select" 
-        v-bind:class="{ 'selected' : isSelected(selected), 
-            'vb': figure == 'B', 'vh': figure == 'H', 'vf': figure == 'F', 'vk': figure == 'K', 'vv': figure == 'V', 'vp': figure == 'P',
-            'fb': figure == 'b', 'fh': figure == 'h', 'ff': figure == 'f', 'fk': figure == 'k', 'fv': figure == 'v', 'fp': figure == 'p'
-        }">
+        v-bind:class="getFigureCssClasses()">
     </div>
 </template>
 
@@ -14,7 +11,7 @@ import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
 
 export default {
-    props: ['figure', 'row', 'index'],
+    props: ['figure', 'row', 'index', 'getFigureCss'],
     methods: {
         updateSelectedRef(row, index, figure) {
             selectedRef.update({
@@ -88,6 +85,12 @@ export default {
             }
 
             return false;
+        },
+        getFigureCssClasses() {
+            return { 
+                ...this.getFigureCss(this.figure), 
+                selected: this.isSelected(this.selected)
+            };
         }
     },
     firebase: {
