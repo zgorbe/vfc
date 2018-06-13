@@ -25,7 +25,6 @@
 
 <script>
 import { tableRef } from './firebase';
-import { selectedRef } from './firebase';
 import { deletedWhitesRef } from './firebase';
 import { deletedBlacksRef } from './firebase';
 
@@ -38,23 +37,7 @@ export default {
   },
   methods: {
     newGame() {
-      tableRef.update({
-        1: 'bhfvkfhb',
-        2: 'pppppppp',
-        3: 'XXXXXXXX',
-        4: 'XXXXXXXX',
-        5: 'XXXXXXXX',
-        6: 'XXXXXXXX',
-        7: 'PPPPPPPP',
-        8: 'BHFVKFHB'
-      });
-      selectedRef.update({
-        row: { value: 0 },
-        index: { value: 0 },
-        figure: { value: 'X' }
-      });
-      deletedBlacksRef.set({});
-      deletedWhitesRef.set({});
+      this.$emit('newGame');
     },
     getFigureCss(figure) {
       return {
@@ -82,14 +65,7 @@ export default {
     },
     deletedWhites: deletedWhitesRef,
     deletedBlacks: deletedBlacksRef    
-  },
-  created: function () {
-    selectedRef.update({
-      row: { value: 0 },
-      index: { value: 0 },
-      figure: { value: 'X' }
-    });
-  }
+  }  
 }
 </script>
 

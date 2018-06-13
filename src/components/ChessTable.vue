@@ -9,11 +9,44 @@
 
 <script>
 import { tableRef } from '../firebase';
+import { selectedRef } from '../firebase';
+import { deletedWhitesRef } from '../firebase';
+import { deletedBlacksRef } from '../firebase';
 
 export default {
     props: ['getFigureCss'],
+    methods: {
+        clearSelected() {
+            selectedRef.update({
+                row: { value: 0 },
+                index: { value: 0 },
+                figure: { value: 'X' }
+            });
+        },
+        newGame() {
+            tableRef.update({
+                1: 'bhfvkfhb',
+                2: 'pppppppp',
+                3: 'XXXXXXXX',
+                4: 'XXXXXXXX',
+                5: 'XXXXXXXX',
+                6: 'XXXXXXXX',
+                7: 'PPPPPPPP',
+                8: 'BHFVKFHB'
+            });
+            
+            this.clearSelected();
+
+            deletedBlacksRef.set({});
+            deletedWhitesRef.set({});
+        }
+    },      
     firebase: {
         table: tableRef
+    },
+    created() {
+        this.clearSelected();
+        this.$parent.$on('newGame', this.newGame);
     }
 }
 </script>
