@@ -1,7 +1,5 @@
 <template>
-    <div class="field" v-on:click="select" 
-        v-bind:class="getFigureCssClasses()">
-    </div>
+    <div class="field" v-on:click="select" v-bind:class="getFigureCssClasses()"></div>
 </template>
 
 <script>
@@ -11,7 +9,7 @@ import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
 
 export default {
-    props: ['figure', 'row', 'index', 'getFigureCss'],
+    props: ['figure', 'row', 'index'],
     methods: {
         updateSelectedRef(row, index, figure) {
             selectedRef.update({
