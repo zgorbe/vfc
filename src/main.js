@@ -21,19 +21,9 @@ Vue.mixin({
   methods: {
     stringReplaceAt: (str, repl, index) => str.substr(0, index) + repl + str.substr(index + repl.length),
     getFigureCss: (figure) => {
+      var cssClassPrefix = figure.toUpperCase() == figure ? 'v' : 'f';
       return {
-        'vb': figure == 'B',
-        'vh': figure == 'H',
-        'vf': figure == 'F',
-        'vv': figure == 'V',
-        'vk': figure == 'K',
-        'vp': figure == 'P',
-        'fb': figure == 'b',
-        'fh': figure == 'h',
-        'ff': figure == 'f',
-        'fv': figure == 'v',
-        'fk': figure == 'k',
-        'fp': figure == 'p'
+        [cssClassPrefix + figure.toLowerCase()]: true
       }
     }
   }  
