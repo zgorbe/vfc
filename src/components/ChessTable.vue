@@ -12,8 +12,10 @@ import { tableRef } from '../firebase';
 import { selectedRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
+import mixin from '../mixins';
 
 export default {
+    mixins: [mixin],
     methods: {
         clearSelected() {
             selectedRef.update({

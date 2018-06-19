@@ -7,9 +7,11 @@ import { selectedRef } from '../firebase';
 import { tableRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
+import mixin from '../mixins';
 
 export default {
     props: ['figure', 'row', 'index'],
+    mixins: [mixin],
     methods: {
         updateSelectedRef(row, index, figure) {
             selectedRef.update({

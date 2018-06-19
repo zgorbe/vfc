@@ -10,9 +10,11 @@
 <script>
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
+import mixin from '../mixins';
 
 export default {
     props: ['team'],
+    mixins: [mixin],
     firebase: {
         deletedWhites: deletedWhitesRef,
         deletedBlacks: deletedBlacksRef 

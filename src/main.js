@@ -17,21 +17,9 @@ Vue.component('chess-table', ChessTable);
 Vue.component('chess-field', ChessField);
 Vue.component('deleted-figures', DeletedFigures);
 
-Vue.mixin({
-  methods: {
-    stringReplaceAt: (str, repl, index) => str.substr(0, index) + repl + str.substr(index + repl.length),
-    getFigureCss: (figure) => {
-      var cssClassPrefix = figure.toUpperCase() == figure ? 'v' : 'f';
-      return {
-        [cssClassPrefix + figure.toLowerCase()]: true
-      }
-    }
-  }  
-});
-
 /* eslint-disable no-new */
 new Vue({
-  el: '#app',
-  components: { App },
-  template: '<App/>'
+    el: '#app',
+    components: { App },
+    template: '<App/>'
 });
