@@ -12,10 +12,13 @@
       </div>
       <div class="row">
         <div class="buttons col-12">
-          <button class="btn btn-secondary" v-on:click="newGame">New Game</button>
+          <b-btn v-b-modal.newGameConfirmation>New Game</b-btn>
         </div>
       </div>
     </div>
+    <b-modal id="newGameConfirmation" title="New Game" ok-title="Yes" v-on:ok="newGame">
+        <p>Would you like to start a new game?</p>
+    </b-modal>    
   </div>
 </template>
 
