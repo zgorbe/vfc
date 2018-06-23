@@ -1,9 +1,6 @@
 <template>
-    <div v-if="team == 'whites'" class="figure-container whites col-2">
-        <div class="figure" v-for="figure in deletedWhites" v-bind:key="figure['.key']" v-bind:class="getFigureCss(figure['.value'])"></div>
-    </div>
-    <div v-else class="figure-container blacks col-2">
-        <div class="figure" v-for="figure in deletedBlacks" v-bind:key="figure['.key']" v-bind:class="getFigureCss(figure['.value'])"></div>
+    <div class="figure-container col-2" v-bind:class="{ [color]: true }">
+        <div class="figure" v-for="figure in color == 'whites' ? deletedWhites : deletedBlacks" v-bind:key="figure['.key']" v-bind:class="getFigureCss(figure['.value'])"></div>
     </div>        
 </template>
 
@@ -13,7 +10,7 @@ import { deletedBlacksRef } from '../firebase';
 import mixin from '../mixins';
 
 export default {
-    props: ['team'],
+    props: ['color'],
     mixins: [mixin],
     firebase: {
         deletedWhites: deletedWhitesRef,
@@ -22,7 +19,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 @import '../../node_modules/bootstrap/scss/bootstrap.scss';
 
 .figure-container {

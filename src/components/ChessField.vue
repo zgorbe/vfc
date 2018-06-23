@@ -64,6 +64,12 @@ export default {
                             deletedWhitesRef.push(this.figure);
                         }
                     }
+                    // trigger figure selection if needed
+                    if ((selectedObj.figure == 'P' && this.row == 1) || 
+                        (selectedObj.figure == 'p' && this.row == 8)) {
+                        
+                        this.$emit('figureSelection', this.getFigureColor(selectedObj.figure), this.row, this.index);
+                    } 
                 }
                 // clear selection
                 this.updateSelectedRef(0, 0, 'X');
@@ -99,13 +105,3 @@ export default {
     }
 }
 </script>
-
-<style lang="scss">
-$image-list: 'fb', 'fh', 'ff', 'fk', 'fv', 'fp', 'vb', 'vh', 'vf', 'vk', 'vv', 'vp';
-@each $image in $image-list {
-    .#{$image} {
-        background-image: url(../assets/#{$image}.svg);
-        cursor: pointer;
-    }
-}
-</style>
