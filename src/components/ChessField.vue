@@ -49,27 +49,29 @@ export default {
             if (selectedObj.figure != 'X') {
                 if (this.isValidMove(selectedObj)) {
                     // move figure
-                    this.updateTable(selectedObj, 'X').then(() =>  { 
+                    this.updateTable(selectedObj, 'X').then(() =>  {
+                        var currentFigure = this.figure; 
                         this.updateTable({
                             row: this.row,
                             index: this.index,
                             figure: this.figure
-                        }, selectedObj.figure);
+                        }, selectedObj.figure).then(() => {
+                            // delete a figure
+                            if (currentFigure != 'X') {
+                                if (currentFigure.toUpperCase() != currentFigure) {
+                                    deletedBlacksRef.push(currentFigure);
+                                } else {
+                                    deletedWhitesRef.push(currentFigure);
+                                }
+                            }
+                            // trigger figure selection if needed
+                            if ((selectedObj.figure == 'P' && this.row == 1) || 
+                                (selectedObj.figure == 'p' && this.row == 8)) {
+                                
+                                this.$emit('figureSelection', this.getFigureColor(selectedObj.figure), this.row, this.index);
+                            } 
+                        });
                     });
-                    // delete a figure
-                    if (this.figure != 'X') {
-                        if (this.figure.toUpperCase() != this.figure) {
-                            deletedBlacksRef.push(this.figure);
-                        } else {
-                            deletedWhitesRef.push(this.figure);
-                        }
-                    }
-                    // trigger figure selection if needed
-                    if ((selectedObj.figure == 'P' && this.row == 1) || 
-                        (selectedObj.figure == 'p' && this.row == 8)) {
-                        
-                        this.$emit('figureSelection', this.getFigureColor(selectedObj.figure), this.row, this.index);
-                    } 
                 }
                 // clear selection
                 this.updateSelectedRef(0, 0, 'X');

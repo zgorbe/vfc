@@ -6,14 +6,7 @@
                 v-on:figureSelection="showFigureSelector"/>
         </template>
         
-        <b-modal ref="figureSelector" title="Select a figure" hide-footer no-close-on-esc no-close-on-backdrop hide-header-close>
-            <div class="figures">
-                <div class="figure fb"></div>
-                <div class="figure fh"></div>
-                <div class="figure ff"></div>
-                <div class="figure fv"></div>
-            </div>
-        </b-modal> 
+        <figure-selector></figure-selector>
     </div>
 </template>
 
@@ -52,7 +45,7 @@ export default {
             deletedWhitesRef.set({});
         },
         showFigureSelector(color, row, index) {
-            this.$refs.figureSelector.show();
+            this.$emit('figureSelection', color, row, index);
         }
     },      
     firebase: {
@@ -82,7 +75,7 @@ export default {
             display: block;
             padding: 50% 0;
         }
-      
+
         &.selected {
             background-color: #755 !important;
         }
@@ -91,24 +84,6 @@ export default {
             $evenOrOdd: if($i % 2 == 0, even, odd);
             &:nth-child(n+#{$i * 8 + 1}):nth-child(#{$evenOrOdd}):nth-child(-n+#{($i + 1) * 8}) {
                 background-color: #999;    
-            }
-        }
-    }
-
-    .figures {
-        display: table;
-        margin: 10px 0;
-        width: 100%;
-        .figure {
-            background-size: cover;
-            display: table-cell;
-            &:before {
-                content: '';
-                display: block;
-                padding: 50% 0;
-            }
-            &:hover {
-                background-color: #755;
             }
         }
     }
