@@ -68,7 +68,7 @@ export default {
                             if ((selectedObj.figure == 'P' && this.row == 1) || 
                                 (selectedObj.figure == 'p' && this.row == 8)) {
                                 
-                                this.$emit('figureSelection', this.getFigureColor(selectedObj.figure), this.row, this.index);
+                                this.$root.$emit('figureSelection', this.getFigureColor(selectedObj.figure), this.row, this.index);
                             } 
                         });
                     });

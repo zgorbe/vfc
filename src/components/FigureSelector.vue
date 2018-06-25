@@ -40,7 +40,7 @@ export default {
         }
     },
     created() {
-        this.$parent.$on('figureSelection', this.showFigureSelector);
+        this.$root.$on('figureSelection', this.showFigureSelector);
     }
 }
 </script>

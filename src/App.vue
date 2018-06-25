@@ -34,7 +34,7 @@ export default {
   },
   methods: {
     newGame() {
-      this.$emit('newGame');
+      this.$root.$emit('newGame');
     }    
   },
   firebase: {

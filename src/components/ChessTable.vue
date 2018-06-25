@@ -2,8 +2,7 @@
     <div class="chess-table clearfix">
         <template v-for="row in table">
             <chess-field v-for="(cell, index) in row['.value']" v-bind:key="index + row['.key']" 
-                v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" v-bind:getFigureCss="getFigureCss" 
-                v-on:figureSelection="showFigureSelector"/>
+                v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" v-bind:getFigureCss="getFigureCss" />
         </template>
         
         <figure-selector></figure-selector>
@@ -43,9 +42,6 @@ export default {
 
             deletedBlacksRef.set({});
             deletedWhitesRef.set({});
-        },
-        showFigureSelector(color, row, index) {
-            this.$emit('figureSelection', color, row, index);
         }
     },      
     firebase: {
@@ -53,7 +49,7 @@ export default {
     },
     created() {
         this.clearSelected();
-        this.$parent.$on('newGame', this.newGame);
+        this.$root.$on('newGame', this.newGame);
     }
 }
 </script>
