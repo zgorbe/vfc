@@ -21,11 +21,10 @@ export default {
             });
         },
         updateTable(field, figure) {
-            return tableRef.child(field.row).once('value').then((data) => {
-                var resultRow = this.stringReplaceAt(data.val(), figure, field.index - 1);
+            var actualRow = this.table[field.row - 1]['.value'],
+                resultRow = this.stringReplaceAt(actualRow, figure, field.index - 1);
                 
-                return tableRef.child(field.row).set(resultRow);
-            });
+            return tableRef.child(field.row).set(resultRow);
         },
         getFigureColor(figure) {
             return figure.toUpperCase() == 'X' ? '' : figure.toUpperCase() == figure ? 'white' : 'black';

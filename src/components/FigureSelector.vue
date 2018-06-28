@@ -22,13 +22,13 @@ export default {
     },
     methods: {
         selectFigure(fig) {
-            var figure = this.color == 'v' ? fig.toUpperCase() : fig.toLowerCase();
-
-            tableRef.child(this.row).once('value').then((data) => {
-                var resultRow = this.stringReplaceAt(data.val(), figure, this.index - 1);
+            var figure = this.color == 'v' ? fig.toUpperCase() : fig.toLowerCase(),
+                actualRow = this.table[this.row - 1]['.value'],
+                resultRow = this.stringReplaceAt(actualRow, figure, this.index - 1);
                 
-                tableRef.child(this.row).set(resultRow);
-            }).then(this.$refs.figureSelector.hide);
+            tableRef.child(this.row)
+                .set(resultRow)
+                .then(this.$refs.figureSelector.hide);
         },
         showFigureSelector(color, row, index) {
             this.color = color == 'white' ? 'v' : 'f';
@@ -38,6 +38,9 @@ export default {
 
             this.$refs.figureSelector.show();
         }
+    },
+    firebase: {
+        table: tableRef
     },
     created() {
         this.$root.$on('figureSelection', this.showFigureSelector);
