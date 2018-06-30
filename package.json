@@ -15,6 +15,7 @@
   "dependencies": {
     "bootstrap-vue": "^2.0.0-rc.11",
     "firebase": "^5.0.4",
+    "lodash": "^4.17.10",    
     "vue": "^2.5.2",
     "vuefire": "^1.4.5"
   },

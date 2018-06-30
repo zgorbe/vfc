@@ -8,9 +8,17 @@ import { tableRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
 import mixin from '../mixins';
+import chess from '../chess';
+import _ from 'lodash';
 
 export default {
     props: ['figure', 'row', 'index'],
+    data() {
+        return {
+            available: false,
+            attacked: false
+        }
+    },
     mixins: [mixin],
     methods: {
         updateSelectedRef(row, index, figure) {
@@ -35,7 +43,7 @@ export default {
             
             return isDifferentFieldSelected && isDifferentColorSelected;
         },
-        select() {
+        getSelectedAsObject() {
             var selectedObj = {};
             for (let item of this.selected) {
                 for (let prop of ['row', 'index', 'figure']) {
@@ -44,19 +52,24 @@ export default {
                     }
                 }
             }
+            return selectedObj;
+        },
+        select() {
+            var selectedObj = this.getSelectedAsObject(),
+                currentField = {
+                    row: parseInt(this.row, 10),
+                    index: this.index,
+                    figure: this.figure
+                };
 
             if (selectedObj.figure != 'X') {
-                if (this.isValidMove(selectedObj)) {
+                if (this.available || 'PH'.indexOf(selectedObj.figure.toUpperCase()) > -1) {
                     // move figure
                     this.updateTable(selectedObj, 'X').then(() =>  {
-                        var currentFigure = this.figure; 
-                        this.updateTable({
-                            row: this.row,
-                            index: this.index,
-                            figure: this.figure
-                        }, selectedObj.figure).then(() => {
+                        var currentFigure = currentField.figure; 
+                        this.updateTable(currentField, selectedObj.figure).then(() => {
                             // delete a figure
-                            if (currentFigure != 'X') {
+                            if (currentFigure != 'X' || 'PH'.indexOf(selectedObj.figure.toUpperCase()) > -1) {
                                 if (currentFigure.toUpperCase() != currentFigure) {
                                     deletedBlacksRef.push(currentFigure);
                                 } else {
@@ -64,19 +77,25 @@ export default {
                                 }
                             }
                             // trigger figure selection if needed
-                            if ((selectedObj.figure == 'P' && this.row == 1) || 
-                                (selectedObj.figure == 'p' && this.row == 8)) {
+                            if ((selectedObj.figure == 'P' && currentField.row == 1) || 
+                                (selectedObj.figure == 'p' && currentField.row == 8)) {
                                 
-                                this.$root.$emit('figureSelection', this.getFigureColor(selectedObj.figure), this.row, this.index);
+                                this.$root.$emit('figureSelection', this.getFigureColor(selectedObj.figure), currentField.row, currentField.index);
                             } 
                         });
                     });
                 }
                 // clear selection
                 this.updateSelectedRef(0, 0, 'X');
+                this.$root.$emit('newAvailableFields', []);
             } else if (this.figure != 'X') {
                 // do selection
                 this.updateSelectedRef(parseInt(this.row, 10), this.index, this.figure);
+                this.availableFields = chess.getAvailableFields(
+                    currentField,
+                    this.table.map((row) => row['.value'])
+                );
+                this.$root.$emit('newAvailableFields', this.availableFields);
             }
         },
         isSelected(selected) {
@@ -96,13 +115,33 @@ export default {
         getFigureCssClasses() {
             return { 
                 ...this.getFigureCss(this.figure), 
-                selected: this.isSelected(this.selected)
+                selected: this.isSelected(this.selected),
+                available: this.available,
+                attacked: this.attacked
             };
         }
     },
     firebase: {
         selected: selectedRef,
         table: tableRef
+    },
+    created() {
+        this.$root.$on('newAvailableFields', (availableFields) => {
+            var available = false;
+            _.each(availableFields, field => {
+                if (field.row == this.row && field.index == this.index) {
+                    available = true;
+                    this.attacked = field.isAttackedField;
+
+                    return false;
+                }
+            });
+            this.available = available;
+
+            if (!this.available) {
+                this.attacked = false;
+            }
+        });
     }
 }
 </script>

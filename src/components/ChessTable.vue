@@ -42,6 +42,8 @@ export default {
 
             deletedBlacksRef.set({});
             deletedWhitesRef.set({});
+            
+            this.$root.$emit('newAvailableFields', []);
         }
     },      
     firebase: {
@@ -55,6 +57,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@import '../../node_modules/bootstrap/scss/bootstrap.scss';
 .chess-table {
     border: 1vw solid #422;
 
@@ -76,10 +79,22 @@ export default {
             background-color: #755 !important;
         }
 
+        &.available {
+            border: 2px dotted #050;
+        }
+        &.attacked {
+            border-color: #A00 !important;
+        }
         @for $i from 0 through 7 {
             $evenOrOdd: if($i % 2 == 0, even, odd);
             &:nth-child(n+#{$i * 8 + 1}):nth-child(#{$evenOrOdd}):nth-child(-n+#{($i + 1) * 8}) {
                 background-color: #999;    
+            }
+        }
+
+        @include media-breakpoint-up(lg) {
+            &.available {
+                border: 4px dotted #050;
             }
         }
     }
