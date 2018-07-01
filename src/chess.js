@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 const chess = {
     moveConfig: {
-        p : {}, // pawn, maybe it has too special move... important whether black or white pawn
+        p : { moveLikeAPawn: true }, // pawn, maybe it has too special move... important whether black or white pawn
         b : { moveInVH : true }, // rock
         h : { moveInLShape : true }, // knight
         f : { moveInCross : true }, // bishop
@@ -108,6 +108,53 @@ const chess = {
         ]
     },
 
+    _getFieldsForPawn(field, table) {
+        var color = this._getFigureColor(field.figure),
+            availableFields = [];
+
+        var fieldsInFront = [
+            { row: color == 'white' ? field.row - 1 : field.row + 1, index: field.index }
+        ];
+
+        var fieldsInCross = [
+            { row: color == 'white' ? field.row - 1 : field.row + 1, index: field.index - 1 },
+            { row: color == 'white' ? field.row - 1 : field.row + 1, index: field.index + 1 }
+        ];
+
+        if (color == 'white' && field.row == 7) {
+            fieldsInFront.push({ row: field.row - 2, index: field.index });
+        }
+
+        if (color == 'black' && field.row == 2) {
+            fieldsInFront.push({ row: field.row + 2, index: field.index });
+        }
+
+        _.each(fieldsInFront, field => {
+            if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
+                return;
+            }
+            var figure = table[field.row - 1].charAt(field.index - 1);
+            if (figure == 'X') {
+                availableFields.push(field);
+            }
+        });
+
+        _.each(fieldsInCross, field => {
+            if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
+                return;
+            }
+            var figure = table[field.row - 1].charAt(field.index - 1),
+                figureColor = this._getFigureColor(figure);
+            if (figure != 'X' && color != figureColor) {
+                field.isAttackedField = true;
+                availableFields.push(field);
+            }
+        });
+    
+
+        return availableFields;
+    },
+
     getAvailableFields(field, table) {
         var moveConfig = this.moveConfig[field.figure.toLowerCase()],
             availableFields = [];
@@ -121,7 +168,11 @@ const chess = {
         }
 
         if (moveConfig.moveInLShape) {
-            availableFields = _.concat(availableFields, this._getFieldsInLShape(field, table));            
+            availableFields = _.concat(availableFields, this._getFieldsInLShape(field, table));
+        }
+
+        if (moveConfig.moveLikeAPawn) {
+            availableFields = _.concat(availableFields, this._getFieldsForPawn(field, table));
         }
         return availableFields;
     }

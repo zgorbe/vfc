@@ -63,13 +63,13 @@ export default {
                 };
 
             if (selectedObj.figure != 'X') {
-                if (this.available || 'P'.indexOf(selectedObj.figure.toUpperCase()) > -1) {
+                if (this.available) {
                     // move figure
                     this.updateTable(selectedObj, 'X').then(() =>  {
                         var currentFigure = currentField.figure; 
                         this.updateTable(currentField, selectedObj.figure).then(() => {
                             // delete a figure
-                            if (currentFigure != 'X' || 'P'.indexOf(selectedObj.figure.toUpperCase()) > -1) {
+                            if (currentFigure != 'X') {
                                 if (currentFigure.toUpperCase() != currentFigure) {
                                     deletedBlacksRef.push(currentFigure);
                                 } else {
