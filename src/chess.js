@@ -10,6 +10,10 @@ const chess = {
         v : { moveInVH: true, moveInCross: true } //queen
     },
 
+    _getFigureColor(figure) {
+        return figure.toUpperCase() == figure ? 'white' : 'black';
+    },
+
     _filterToNextFieldOnly(fields) {
         return _.chain(fields).take(1).compact().value();
     },
@@ -22,7 +26,7 @@ const chess = {
                 return false;
             }
             var figure = table[field.row - 1].charAt(field.index - 1),
-                figureColor = figure.toUpperCase() == figure ? 'white' : 'black';
+                figureColor = this._getFigureColor(figure);
             
             if (figure == 'X') {
                 validFields.push(field);
@@ -52,7 +56,7 @@ const chess = {
     },
 
     _getFieldsInVH(field, table, moveToNextFieldOnly) {
-        var color = field.figure.toUpperCase() == field.figure ? 'white' : 'black';
+        var color = this._getFigureColor(field.figure);
 
         var fieldsUp = _.range(field.row - 1, 0, -1).map(i => ({ row: i, index: field.index })),
             fieldsRight = _.range(field.index + 1, 9).map(i => ({ row: field.row, index: i })),
@@ -68,7 +72,7 @@ const chess = {
     },
 
     _getFieldsInCross(field, table, moveToNextFieldOnly) {
-        var color = field.figure.toUpperCase() == field.figure ? 'white' : 'black';
+        var color = this._getFigureColor(field.figure);
 
         var fieldsUpRight = _.range(field.row - 1, 0, -1).map((i, index) => ({ row: i, index: field.index + index + 1 })),
             fieldsDownRight = _.range(field.index + 1, 9).map((i, index) => ({ row: field.row + index + 1, index: i })),
@@ -82,6 +86,27 @@ const chess = {
             color
         );
     },
+    _getFieldsInLShape(field, table) {
+        var color = this._getFigureColor(field.figure);
+
+        var upArray = [
+            [{ row: field.row - 1, index: field.index - 2 }],
+            [{ row: field.row - 2, index: field.index - 1 }],
+            [{ row: field.row - 1, index: field.index + 2 }],
+            [{ row: field.row - 2, index: field.index + 1 }]
+        ];
+        var downArray = [
+            [{ row: field.row + 1, index: field.index - 2 }],
+            [{ row: field.row + 2, index: field.index - 1 }],
+            [{ row: field.row + 1, index: field.index + 2 }],
+            [{ row: field.row + 2, index: field.index + 1 }]
+        ];
+
+        return [
+            ...this._getValidAvailableFields(upArray, table, false, color),
+            ...this._getValidAvailableFields(downArray, table, false, color)
+        ]
+    },
 
     getAvailableFields(field, table) {
         var moveConfig = this.moveConfig[field.figure.toLowerCase()],
@@ -93,6 +118,10 @@ const chess = {
 
         if (moveConfig.moveInCross) {
             availableFields = _.concat(availableFields, this._getFieldsInCross(field, table, moveConfig.moveToNextFieldOnly));
+        }
+
+        if (moveConfig.moveInLShape) {
+            availableFields = _.concat(availableFields, this._getFieldsInLShape(field, table));            
         }
         return availableFields;
     }

@@ -57,7 +57,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-@import '../../node_modules/bootstrap/scss/bootstrap.scss';
 .chess-table {
     border: 1vw solid #422;
 
@@ -67,6 +66,7 @@ export default {
         background-size: 80% 80%;
 
         float: left;
+        position: relative;
         width: 12.5%;
 
         &:before {
@@ -79,22 +79,23 @@ export default {
             background-color: #755 !important;
         }
 
-        &.available {
-            border: 2px dotted #050;
+        &.available:after {
+            background-color: #050;
+            bottom: 0;
+            content: '';
+            left: 0;
+            opacity: .4;
+            position: absolute;
+            right: 0;
+            top: 0;
         }
-        &.attacked {
-            border-color: #A00 !important;
+        &.attacked:after {
+            background-color: #A00;
         }
         @for $i from 0 through 7 {
             $evenOrOdd: if($i % 2 == 0, even, odd);
             &:nth-child(n+#{$i * 8 + 1}):nth-child(#{$evenOrOdd}):nth-child(-n+#{($i + 1) * 8}) {
                 background-color: #999;    
-            }
-        }
-
-        @include media-breakpoint-up(lg) {
-            &.available {
-                border: 4px dotted #050;
             }
         }
     }
