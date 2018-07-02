@@ -99,5 +99,12 @@ export default {
             }
         }
     }
+
+    &.rotated {
+        transform: rotate(180deg);
+        .field {
+            transform: rotate(180deg);
+        }
+    }
 }
 </style>

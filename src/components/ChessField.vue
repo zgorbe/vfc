@@ -34,15 +34,6 @@ export default {
                 
             return tableRef.child(field.row).set(resultRow);
         },
-        getFigureColor(figure) {
-            return figure.toUpperCase() == 'X' ? '' : figure.toUpperCase() == figure ? 'white' : 'black';
-        },
-        isValidMove(selectedObj) {
-            var isDifferentFieldSelected = selectedObj.row != this.row || selectedObj.index != this.index,
-                isDifferentColorSelected = this.getFigureColor(selectedObj.figure) != this.getFigureColor(this.figure);
-            
-            return isDifferentFieldSelected && isDifferentColorSelected;
-        },
         getSelectedAsObject() {
             var selectedObj = {};
             for (let item of this.selected) {
@@ -80,7 +71,7 @@ export default {
                             if ((selectedObj.figure == 'P' && currentField.row == 1) || 
                                 (selectedObj.figure == 'p' && currentField.row == 8)) {
                                 
-                                this.$root.$emit('figureSelection', this.getFigureColor(selectedObj.figure), currentField.row, currentField.index);
+                                this.$root.$emit('figureSelection', chess.getFigureColor(selectedObj.figure), currentField.row, currentField.index);
                             } 
                         });
                     });

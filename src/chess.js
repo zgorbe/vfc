@@ -121,14 +121,15 @@ function getFieldsForPawn(field, table) {
         { row: color == 'white' ? field.row - 1 : field.row + 1, index: field.index + 1 }
     ];
 
-    if (color == 'white' && field.row == 7) {
-        fieldsInFront.push({ row: field.row - 2, index: field.index });
-    }
+    if (table[fieldsInFront[0].row - 1].charAt(fieldsInFront[0].index - 1) == 'X') {
+        if (color == 'white' && field.row == 7) {
+            fieldsInFront.push({ row: field.row - 2, index: field.index });
+        }
 
-    if (color == 'black' && field.row == 2) {
-        fieldsInFront.push({ row: field.row + 2, index: field.index });
+        if (color == 'black' && field.row == 2) {
+            fieldsInFront.push({ row: field.row + 2, index: field.index });
+        }
     }
-
     _.each(fieldsInFront, field => {
         if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
             return;

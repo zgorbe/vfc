@@ -6,13 +6,14 @@
       <div class="row">
         <deleted-figures v-bind:color="'whites'"></deleted-figures>
         <div class="col-8">
-          <chess-table></chess-table>
+          <chess-table v-bind:class="{ rotated: isTableRotated }"></chess-table>
         </div>
         <deleted-figures v-bind:color="'blacks'"></deleted-figures>
       </div>
       <div class="row">
         <div class="buttons col-12">
           <b-btn v-b-modal.newGameConfirmation>New Game</b-btn>
+          <b-btn v-on:click="rotateTable">Rotate table</b-btn>
         </div>
       </div>
     </div>
@@ -26,25 +27,29 @@
 import { tableRef } from './firebase';
 
 export default {
-  name: 'App',
-  data() {
-    return  {
-      loading: true
-    }
-  },
-  methods: {
-    newGame() {
-      this.$root.$emit('newGame');
-    }    
-  },
-  firebase: {
-    table: {
-      source: tableRef,
-      readyCallback() {
-        this.loading = false;
-      }
-    }
-  }  
+    name: 'App',
+    data() {
+        return  {
+            loading: true,
+            isTableRotated: false
+        }
+    },
+    methods: {
+        newGame() {
+            this.$root.$emit('newGame');
+        },
+        rotateTable() {
+            this.isTableRotated = !this.isTableRotated;
+        }
+    },
+    firebase: {
+        table: {
+            source: tableRef,
+            readyCallback() {
+                this.loading = false;
+            }
+        }
+    }  
 }
 </script>
 
@@ -57,6 +62,9 @@ export default {
         display: flex;
         justify-content: center;
         margin-top: 20px;
+        button {
+            margin: 0 5px;
+        }
     }
 
     .loading {
