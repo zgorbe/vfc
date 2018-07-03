@@ -28,12 +28,20 @@ export default {
                 figure: { value: figure }
             });
         },
-        updateTable(field, figure) {
-            var actualRow = this.table[field.row - 1]['.value'],
-                resultRow = this.stringReplaceAt(actualRow, figure, field.index - 1);
+        updateTable(sourceField, targetField) {
+            var isUpdateInSameRow = sourceField.row == targetField.row,
+                sourceRow = this.table[sourceField.row - 1]['.value'],
+                figureToMove = sourceRow.charAt(sourceField.index - 1),
+                updatedSourceRow = this.stringReplaceAt(sourceRow, 'X', sourceField.index - 1),
+                targetRow = isUpdateInSameRow ? updatedSourceRow : this.table[targetField.row - 1]['.value'],
+                updatedTargetRow = this.stringReplaceAt(targetRow, figureToMove, targetField.index - 1);
                 
-            return tableRef.child(field.row).set(resultRow);
+            return Promise.all([
+                isUpdateInSameRow ? Promise.resolve() : tableRef.child(sourceField.row).set(updatedSourceRow),
+                tableRef.child(targetField.row).set(updatedTargetRow)
+            ]);
         },
+        // TODO: investigate whether this can be done in a better way (vuefire's asObject property)
         getSelectedAsObject() {
             var selectedObj = {};
             for (let item of this.selected) {
@@ -56,24 +64,21 @@ export default {
             if (selectedObj.figure != 'X') {
                 if (this.available) {
                     // move figure
-                    this.updateTable(selectedObj, 'X').then(() =>  {
-                        var currentFigure = currentField.figure; 
-                        this.updateTable(currentField, selectedObj.figure).then(() => {
-                            // delete a figure
-                            if (currentFigure != 'X') {
-                                if (currentFigure.toUpperCase() != currentFigure) {
-                                    deletedBlacksRef.push(currentFigure);
-                                } else {
-                                    deletedWhitesRef.push(currentFigure);
-                                }
+                    this.updateTable(selectedObj, currentField).then(() =>  {
+                        // delete a figure
+                        if (currentField.figure != 'X') {
+                            if (chess.getFigureColor(currentField.figure) == 'black') {
+                                deletedBlacksRef.push(currentField.figure);
+                            } else {
+                                deletedWhitesRef.push(currentField.figure);
                             }
-                            // trigger figure selection if needed
-                            if ((selectedObj.figure == 'P' && currentField.row == 1) || 
-                                (selectedObj.figure == 'p' && currentField.row == 8)) {
-                                
-                                this.$root.$emit('figureSelection', chess.getFigureColor(selectedObj.figure), currentField.row, currentField.index);
-                            } 
-                        });
+                        }
+                        // trigger figure selection if needed
+                        if ((selectedObj.figure == 'P' && currentField.row == 1) || 
+                            (selectedObj.figure == 'p' && currentField.row == 8)) {
+                            
+                            this.$root.$emit('figureSelection', chess.getFigureColor(selectedObj.figure), currentField.row, currentField.index);
+                        } 
                     });
                 }
                 // clear selection
@@ -90,18 +95,8 @@ export default {
             }
         },
         isSelected(selected) {
-            if (selected && selected.length) {
-                var rowMatch = false,
-                    indexMatch = false;
-
-                for (let item of selected) {
-                    rowMatch = rowMatch || (item['.key'] == 'row' && item.value == this.row);
-                    indexMatch = indexMatch || (item['.key'] == 'index' && item.value == this.index);
-                }
-                return rowMatch && indexMatch;
-            }
-
-            return false;
+            var selectedObj = this.getSelectedAsObject();
+            return selectedObj.row == this.row && selectedObj.index == this.index;
         },
         getFigureCssClasses() {
             return { 
@@ -113,7 +108,10 @@ export default {
         }
     },
     firebase: {
-        selected: selectedRef,
+        selected: {
+            source: selectedRef /*,
+            asObject: true */
+        },
         table: tableRef
     },
     created() {
