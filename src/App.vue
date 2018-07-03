@@ -3,10 +3,10 @@
     <div v-if="loading" class="loading">
     </div>
     <div v-else class="container">
-      <div class="row">
+      <div class="row" v-bind:class="{ rotated: isTableRotated }">
         <deleted-figures v-bind:color="'whites'"></deleted-figures>
         <div class="col-8">
-          <chess-table v-bind:class="{ rotated: isTableRotated }"></chess-table>
+          <chess-table></chess-table>
         </div>
         <deleted-figures v-bind:color="'blacks'"></deleted-figures>
       </div>
@@ -19,7 +19,8 @@
     </div>
     <b-modal id="newGameConfirmation" title="New Game" ok-title="Yes" cancel-title="No" v-on:ok="newGame">
         <p class="text-center">Would you like to start a new game?</p>
-    </b-modal>    
+    </b-modal>
+    <figure-selector></figure-selector> 
   </div>
 </template>
 
@@ -80,6 +81,11 @@ export default {
             cursor: pointer;
         }
     }
- 
+    .rotated {
+        transform: rotate(180deg);
+        .field, .modal, .figure-container .figure {
+            transform: rotate(180deg);
+        }
+    }
 }
 </style>

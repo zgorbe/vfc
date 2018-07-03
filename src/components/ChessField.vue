@@ -3,7 +3,6 @@
 </template>
 
 <script>
-import { selectedRef } from '../firebase';
 import { tableRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
@@ -12,7 +11,7 @@ import chess from '../chess';
 import _ from 'lodash';
 
 export default {
-    props: ['figure', 'row', 'index'],
+    props: ['figure', 'row', 'index', 'getSelectedField'],
     data() {
         return {
             available: false,
@@ -21,13 +20,6 @@ export default {
     },
     mixins: [mixin],
     methods: {
-        updateSelectedRef(row, index, figure) {
-            selectedRef.update({
-                row: { value: row },
-                index: { value: index },
-                figure: { value: figure }
-            });
-        },
         updateTable(sourceField, targetField) {
             var isUpdateInSameRow = sourceField.row == targetField.row,
                 sourceRow = this.table[sourceField.row - 1]['.value'],
@@ -41,30 +33,19 @@ export default {
                 tableRef.child(targetField.row).set(updatedTargetRow)
             ]);
         },
-        // TODO: investigate whether this can be done in a better way (vuefire's asObject property)
-        getSelectedAsObject() {
-            var selectedObj = {};
-            for (let item of this.selected) {
-                for (let prop of ['row', 'index', 'figure']) {
-                    if (item['.key'] == prop) {
-                        selectedObj[prop] = item.value;
-                    }
-                }
-            }
-            return selectedObj;
-        },
         select() {
-            var selectedObj = this.getSelectedAsObject(),
+            var selectedField = this.getSelectedField(),
                 currentField = {
                     row: parseInt(this.row, 10),
                     index: this.index,
                     figure: this.figure
                 };
 
-            if (selectedObj.figure != 'X') {
+            if (selectedField.figure != 'X') {
                 if (this.available) {
+                    var figureToMove = selectedField.figure;
                     // move figure
-                    this.updateTable(selectedObj, currentField).then(() =>  {
+                    this.updateTable(selectedField, currentField).then(() =>  {
                         // delete a figure
                         if (currentField.figure != 'X') {
                             if (chess.getFigureColor(currentField.figure) == 'black') {
@@ -74,44 +55,44 @@ export default {
                             }
                         }
                         // trigger figure selection if needed
-                        if ((selectedObj.figure == 'P' && currentField.row == 1) || 
-                            (selectedObj.figure == 'p' && currentField.row == 8)) {
+                        if ((figureToMove == 'P' && currentField.row == 1) || 
+                            (figureToMove == 'p' && currentField.row == 8)) {
                             
-                            this.$root.$emit('figureSelection', chess.getFigureColor(selectedObj.figure), currentField.row, currentField.index);
+                            this.$root.$emit('figureSelection', chess.getFigureColor(figureToMove), currentField.row, currentField.index);
                         } 
                     });
                 }
                 // clear selection
-                this.updateSelectedRef(0, 0, 'X');
+                this.$emit('selectField', 0, 0, 'X');
                 this.$root.$emit('newAvailableFields', []);
             } else if (this.figure != 'X') {
                 // do selection
-                this.updateSelectedRef(parseInt(this.row, 10), this.index, this.figure);
                 this.availableFields = chess.getAvailableFields(
                     currentField,
                     this.table.map((row) => row['.value'])
                 );
+                if (this.availableFields.length) {
+                    this.$emit('selectField', parseInt(this.row, 10), this.index, this.figure);
+                } else {
+                    this.$emit('selectField', 0, 0, 'X');
+                }
                 this.$root.$emit('newAvailableFields', this.availableFields);
             }
         },
-        isSelected(selected) {
-            var selectedObj = this.getSelectedAsObject();
-            return selectedObj.row == this.row && selectedObj.index == this.index;
+        isSelected() {
+            var selectedField = this.getSelectedField();
+            return selectedField.row == this.row && selectedField.index == this.index;
         },
         getFigureCssClasses() {
             return { 
                 ...this.getFigureCss(this.figure), 
-                selected: this.isSelected(this.selected),
+                selected: this.isSelected(),
                 available: this.available,
                 attacked: this.attacked
             };
         }
     },
     firebase: {
-        selected: {
-            source: selectedRef /*,
-            asObject: true */
-        },
         table: tableRef
     },
     created() {

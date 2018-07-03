@@ -2,29 +2,34 @@
     <div class="chess-table clearfix">
         <template v-for="row in table">
             <chess-field v-for="(cell, index) in row['.value']" v-bind:key="index + row['.key']" 
-                v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" v-bind:getFigureCss="getFigureCss" />
+                v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" 
+                v-bind:getSelectedField="getSelectedField" v-on:selectField="setSelectedField" />
         </template>
-        
-        <figure-selector></figure-selector>
     </div>
 </template>
 
 <script>
 import { tableRef } from '../firebase';
-import { selectedRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
 import mixin from '../mixins';
 
 export default {
     mixins: [mixin],
+    data() {
+        return {
+            selectedField: {
+                row: 0, 
+                index: 0, 
+                figure: 'X'
+            }
+        }
+    },
     methods: {
-        clearSelected() {
-            selectedRef.update({
-                row: { value: 0 },
-                index: { value: 0 },
-                figure: { value: 'X' }
-            });
+        clearSelectedField() {
+            this.selectedField.row = 0;
+            this.selectedField.index = 0;
+            this.selectedField.figure = 'X';
         },
         newGame() {
             tableRef.update({
@@ -38,20 +43,28 @@ export default {
                 8: 'BHFVKFHB'
             });
             
-            this.clearSelected();
+            this.clearSelectedField();
 
             deletedBlacksRef.set({});
             deletedWhitesRef.set({});
             
             this.$root.$emit('newAvailableFields', []);
+        },
+        getSelectedField() {
+            return this.selectedField;
+        },
+        setSelectedField(row, index, figure) {
+            this.selectedField.row = row;
+            this.selectedField.index = index;
+            this.selectedField.figure = figure;
         }
     },      
     firebase: {
         table: tableRef
     },
     created() {
-        this.clearSelected();
         this.$root.$on('newGame', this.newGame);
+        this.clearSelectedField();
     }
 }
 </script>
@@ -79,6 +92,10 @@ export default {
             background-color: #755 !important;
         }
 
+        &.available, &.attacked {
+            cursor: pointer;
+        }
+
         &.available:after {
             background-color: #050;
             bottom: 0;
@@ -97,13 +114,6 @@ export default {
             &:nth-child(n+#{$i * 8 + 1}):nth-child(#{$evenOrOdd}):nth-child(-n+#{($i + 1) * 8}) {
                 background-color: #999;    
             }
-        }
-    }
-
-    &.rotated {
-        transform: rotate(180deg);
-        .field {
-            transform: rotate(180deg);
         }
     }
 }

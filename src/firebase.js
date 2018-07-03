@@ -12,6 +12,5 @@ const app = firebase.initializeApp({
 
 export const db = app.database();
 export const tableRef = db.ref('table');
-export const selectedRef = db.ref('selected');
 export const deletedWhitesRef = db.ref('deletedWhites');
 export const deletedBlacksRef = db.ref('deletedBlacks');
