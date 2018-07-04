@@ -14,3 +14,4 @@ export const db = app.database();
 export const tableRef = db.ref('table');
 export const deletedWhitesRef = db.ref('deletedWhites');
 export const deletedBlacksRef = db.ref('deletedBlacks');
+export const whoIsNextRef = db.ref('whoIsNext');

@@ -12,6 +12,8 @@
 import { tableRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
+import { whoIsNextRef } from '../firebase';
+
 import mixin from '../mixins';
 
 export default {
@@ -47,6 +49,8 @@ export default {
 
             deletedBlacksRef.set({});
             deletedWhitesRef.set({});
+            
+            whoIsNextRef.set('white');
             
             this.$root.$emit('newAvailableFields', []);
         },

@@ -6,6 +6,7 @@
 import { tableRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
+import { whoIsNextRef } from '../firebase';
 import mixin from '../mixins';
 import chess from '../chess';
 import _ from 'lodash';
@@ -59,13 +60,15 @@ export default {
                             (figureToMove == 'p' && currentField.row == 8)) {
                             
                             this.$root.$emit('figureSelection', chess.getFigureColor(figureToMove), currentField.row, currentField.index);
-                        } 
+                        }
+                        
+                        whoIsNextRef.set(this.whoIsNext['.value'] == 'white' ? 'black' : 'white');
                     });
                 }
                 // clear selection
                 this.$emit('selectField', 0, 0, 'X');
                 this.$root.$emit('newAvailableFields', []);
-            } else if (this.figure != 'X') {
+            } else if (this.figure != 'X' && chess.getFigureColor(this.figure) == this.whoIsNext['.value']) {
                 // do selection
                 this.availableFields = chess.getAvailableFields(
                     currentField,
@@ -93,7 +96,11 @@ export default {
         }
     },
     firebase: {
-        table: tableRef
+        table: tableRef,
+        whoIsNext: {
+            source: whoIsNextRef,
+            asObject: true
+        }
     },
     created() {
         this.$root.$on('newAvailableFields', (availableFields) => {
