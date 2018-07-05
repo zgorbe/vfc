@@ -42,16 +42,18 @@ function filterValidFields(color, fields, table) {
 }
 
 function getValidAvailableFields(fields, table, moveToNextFieldOnly, color) {
+    var result = [];
     if (moveToNextFieldOnly) {
-        for (var i = 0; i < 4; i++) {
+        for (var i = 0; i < fields.length; i++) {
             fields[i] = filterToNextFieldOnly(fields[i]);
         }
     }
-    for (var i = 0; i < 4; i++) {
+    for (var i = 0; i < fields.length; i++) {
         fields[i] = filterValidFields(color, fields[i], table);
+        result.push(...fields[i]);
     }
 
-    return [...fields[0], ...fields[1], ...fields[2], ...fields[3]];
+    return result;
 }
 
 function getFieldsInVH(field, table, moveToNextFieldOnly) {
@@ -156,12 +158,36 @@ function getFieldsForPawn(field, table) {
     return availableFields;
 }
 
+function getFieldsForCastling(field, table, castling) {
+    var color = getFigureColor(field.figure),
+        availableFields = [];
+
+    if (!castling[color].isKingMoved) {
+        var row = color == 'black' ? 1 : 8;
+        availableFields = getValidAvailableFields(
+            [[{ row: row, index: 3 }], [{ row: row, index: 7 }]],
+            table,
+            false, 
+            color
+        );
+        // check if rook(s) moved
+        availableFields = availableFields.filter(field => {
+            var index = field.index == 3 ? 1 : 8;
+            return !_.toArray(castling[color].rookMoves).filter(move => {
+                return move.row == row && move.index == index;
+            }).length;
+        });
+    }
+
+    return availableFields;
+}
+
 const chess = {
     getFigureColor(figure) {
         return getFigureColor(figure);
     },
 
-    getAvailableFields(field, table) {
+    getAvailableFields(field, table, castling) {
         var config = moveConfig[field.figure.toLowerCase()],
             availableFields = [];
 
@@ -179,6 +205,10 @@ const chess = {
 
         if (config.moveLikeAPawn) {
             availableFields = _.concat(availableFields, getFieldsForPawn(field, table));
+        }
+
+        if (castling) { // king is selected
+            availableFields = _.concat(availableFields, getFieldsForCastling(field, table, castling));
         }
         return availableFields;
     }

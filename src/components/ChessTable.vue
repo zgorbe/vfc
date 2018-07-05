@@ -13,6 +13,7 @@ import { tableRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
 import { whoIsNextRef } from '../firebase';
+import { castlingRef } from '../firebase';
 
 import mixin from '../mixins';
 
@@ -52,6 +53,17 @@ export default {
             
             whoIsNextRef.set('white');
             
+            castlingRef.set({
+                black: {
+                    isKingMoved: false,
+                    rookMoves: []
+                },
+                white: {
+                    isKingMoved: false,
+                    rookMoves: []
+                }
+            });
+
             this.$root.$emit('newAvailableFields', []);
         },
         getSelectedField() {

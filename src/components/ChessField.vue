@@ -7,6 +7,7 @@ import { tableRef } from '../firebase';
 import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
 import { whoIsNextRef } from '../firebase';
+import { castlingRef } from '../firebase';
 import mixin from '../mixins';
 import chess from '../chess';
 import _ from 'lodash';
@@ -21,6 +22,7 @@ export default {
     },
     mixins: [mixin],
     methods: {
+        // TODO: move these functions to chess.js
         updateTable(sourceField, targetField) {
             var isUpdateInSameRow = sourceField.row == targetField.row,
                 sourceRow = this.table[sourceField.row - 1]['.value'],
@@ -34,6 +36,62 @@ export default {
                 tableRef.child(targetField.row).set(updatedTargetRow)
             ]);
         },
+        _collectRookMoves(selectedField, color) {
+            if ((color == 'black' && selectedField.row == 1 && (selectedField.index == 1 || selectedField.index == 8)) ||
+                (color == 'white' && selectedField.row == 8 && (selectedField.index == 1 || selectedField.index == 8))) {
+                var rookMoves = _.toArray(this.castling[color].rookMoves),
+                    alreadyAdded = rookMoves.filter(field => {
+                        return field.row == selectedField.row && field.index == selectedField.index;
+                    }).length;
+                if (!alreadyAdded) {
+                    castlingRef.child(color + '/rookMoves').push(selectedField);
+                }
+            }
+        },
+        _handleFigureMove(selectedField, currentField) {
+            // move figure
+            return this.updateTable(selectedField, currentField).then(() =>  {
+                // delete a figure
+                if (currentField.figure != 'X') {
+                    if (chess.getFigureColor(currentField.figure) == 'black') {
+                        deletedBlacksRef.push(currentField.figure);
+                    } else {
+                        deletedWhitesRef.push(currentField.figure);
+                    }
+                }
+                // trigger figure selection if needed
+                if ((selectedField.figure == 'P' && currentField.row == 1) || 
+                    (selectedField.figure == 'p' && currentField.row == 8)) {
+                    
+                    this.$root.$emit('figureSelection', chess.getFigureColor(selectedField.figure), currentField.row, currentField.index);
+                }
+                var whoWasNext = this.whoIsNext['.value'];
+                // king is not moved yet
+                if (!this.castling[whoWasNext].isKingMoved) {
+                    if (selectedField.figure.toUpperCase() == 'B') { // rook is moved
+                        this._collectRookMoves(selectedField, whoWasNext);
+                    }
+                    if (selectedField.figure.toUpperCase() == 'K') {
+                        castlingRef.child(whoWasNext + '/isKingMoved').set(true);
+                    }
+                }
+                return whoIsNextRef.set(whoWasNext == 'white' ? 'black' : 'white');
+            }).then(() => {
+                // if castling then move the rook too
+                if (selectedField.figure.toUpperCase() == 'K' && Math.abs(selectedField.index - currentField.index) > 1) {
+                    var rookSourceField = {
+                        row: chess.getFigureColor(selectedField.figure) == 'black' ? 1 : 8,
+                        index: currentField.index == 3 ? 1 : 8
+                    }
+                    var rookTargetField = {
+                        row: rookSourceField.row,
+                        index: currentField.index == 3 ? 4 : 6
+                    }
+                    return this.updateTable(rookSourceField, rookTargetField);
+                }
+            });
+        },
+        //
         select() {
             var selectedField = this.getSelectedField(),
                 currentField = {
@@ -43,36 +101,21 @@ export default {
                 };
 
             if (selectedField.figure != 'X') {
+                var promise = Promise.resolve();
                 if (this.available) {
-                    var figureToMove = selectedField.figure;
-                    // move figure
-                    this.updateTable(selectedField, currentField).then(() =>  {
-                        // delete a figure
-                        if (currentField.figure != 'X') {
-                            if (chess.getFigureColor(currentField.figure) == 'black') {
-                                deletedBlacksRef.push(currentField.figure);
-                            } else {
-                                deletedWhitesRef.push(currentField.figure);
-                            }
-                        }
-                        // trigger figure selection if needed
-                        if ((figureToMove == 'P' && currentField.row == 1) || 
-                            (figureToMove == 'p' && currentField.row == 8)) {
-                            
-                            this.$root.$emit('figureSelection', chess.getFigureColor(figureToMove), currentField.row, currentField.index);
-                        }
-                        
-                        whoIsNextRef.set(this.whoIsNext['.value'] == 'white' ? 'black' : 'white');
-                    });
+                    promise = this._handleFigureMove(selectedField, currentField);
                 }
                 // clear selection
-                this.$emit('selectField', 0, 0, 'X');
-                this.$root.$emit('newAvailableFields', []);
+                promise.then(() => {
+                    this.$emit('selectField', 0, 0, 'X');
+                    this.$root.$emit('newAvailableFields', []);
+                });
             } else if (this.figure != 'X' && chess.getFigureColor(this.figure) == this.whoIsNext['.value']) {
                 // do selection
                 this.availableFields = chess.getAvailableFields(
                     currentField,
-                    this.table.map((row) => row['.value'])
+                    this.table.map(row => row['.value']),
+                    this.figure.toUpperCase() == 'K' ? this.castling : undefined
                 );
                 if (this.availableFields.length) {
                     this.$emit('selectField', parseInt(this.row, 10), this.index, this.figure);
@@ -99,6 +142,10 @@ export default {
         table: tableRef,
         whoIsNext: {
             source: whoIsNextRef,
+            asObject: true
+        },
+        castling: {
+            source: castlingRef,
             asObject: true
         }
     },
