@@ -15,6 +15,7 @@ import { deletedWhitesRef } from '../firebase';
 import { deletedBlacksRef } from '../firebase';
 import { whoIsNextRef } from '../firebase';
 import { castlingRef } from '../firebase';
+import { lastMoveRef } from '../firebase';
 
 import mixin from '../mixins';
 
@@ -65,6 +66,9 @@ export default {
                     rookMoves: []
                 }
             });
+            
+            lastMoveRef.set([]);
+
             this.figureMoving = false;
             this.$root.$emit('newAvailableFields', []);
         },
@@ -115,11 +119,20 @@ export default {
             background-color: #755 !important;
         }
 
+        @for $i from 0 through 7 {
+            $evenOrOdd: if($i % 2 == 0, even, odd);
+            &:nth-child(n+#{$i * 8 + 1}):nth-child(#{$evenOrOdd}):nth-child(-n+#{($i + 1) * 8}) {
+                background-color: #999;    
+            }
+        }
+    }
+
+    &.highlighting .field {
         &.available, &.attacked {
             cursor: pointer;
         }
 
-        &.available:after {
+        &.available:after, &.last:after {
             background-color: #050;
             bottom: 0;
             content: '';
@@ -130,13 +143,10 @@ export default {
             top: 0;
         }
         &.attacked:after {
-            background-color: #A00;
+            background-color: #A00 !important;
         }
-        @for $i from 0 through 7 {
-            $evenOrOdd: if($i % 2 == 0, even, odd);
-            &:nth-child(n+#{$i * 8 + 1}):nth-child(#{$evenOrOdd}):nth-child(-n+#{($i + 1) * 8}) {
-                background-color: #999;    
-            }
+        &.last:after {
+            background-color: #CEF;
         }
     }
 }

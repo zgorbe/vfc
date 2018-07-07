@@ -6,14 +6,15 @@
       <div class="row" v-bind:class="{ rotated: isTableRotated }">
         <deleted-figures v-bind:color="'whites'"></deleted-figures>
         <div class="col-8">
-          <chess-table></chess-table>
+          <chess-table v-bind:class="{ highlighting }"></chess-table>
         </div>
         <deleted-figures v-bind:color="'blacks'"></deleted-figures>
       </div>
       <div class="row">
         <div class="buttons col-12">
           <b-btn v-b-modal.newGameConfirmation>New Game</b-btn>
-          <b-btn v-on:click="rotateTable">Rotate table</b-btn>
+          <b-btn v-on:click="rotateTable">Rotate Table</b-btn>
+          <b-btn :pressed.sync="highlighting">Toggle Highlighting</b-btn>
         </div>
       </div>
     </div>
@@ -32,7 +33,8 @@ export default {
     data() {
         return  {
             loading: true,
-            isTableRotated: false
+            isTableRotated: false,
+            highlighting: false
         }
     },
     methods: {

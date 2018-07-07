@@ -6,6 +6,7 @@
 import { tableRef } from '../firebase';
 import { whoIsNextRef } from '../firebase';
 import { castlingRef } from '../firebase';
+import { lastMoveRef } from '../firebase';
 import mixin from '../mixins';
 import chess from '../chess';
 import _ from 'lodash';
@@ -64,12 +65,18 @@ export default {
             var selectedField = this.getSelectedField();
             return selectedField.row == this.row && selectedField.index == this.index;
         },
+        isLastMove() {
+            return this.lastMove.filter(field => {
+                return field.row == this.row && field.index == this.index;
+            }).length;
+        },
         getFigureCssClasses() {
             return { 
                 ...this.getFigureCss(this.figure), 
                 selected: this.isSelected(),
                 available: this.available,
-                attacked: this.attacked
+                attacked: this.attacked,
+                last: this.isLastMove()
             };
         }
     },
@@ -82,7 +89,8 @@ export default {
         castling: {
             source: castlingRef,
             asObject: true
-        }
+        },
+        lastMove: lastMoveRef
     },
     created() {
         this.$root.$on('newAvailableFields', (availableFields) => {

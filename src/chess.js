@@ -4,6 +4,8 @@ import { deletedWhitesRef } from './firebase';
 import { deletedBlacksRef } from './firebase';
 import { whoIsNextRef } from './firebase';
 import { castlingRef } from './firebase';
+import { lastMoveRef } from './firebase';
+
 import mixins from './mixins';
 
 const moveConfig = {
@@ -244,6 +246,7 @@ function handleFigureMove(selectedField, currentField, params) {
         }
         return whoIsNextRef.set(whoWasNext == 'white' ? 'black' : 'white');
     }).then(() => {
+        lastMoveRef.set([selectedField, currentField]);
         // if castling then move the rook too
         if (selectedField.figure.toUpperCase() == 'K' && Math.abs(selectedField.index - currentField.index) > 1) {
             var rookSourceField = {
