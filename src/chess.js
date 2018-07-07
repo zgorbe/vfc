@@ -160,7 +160,6 @@ function getFieldsForPawn(field, table) {
         }
     });
 
-
     return availableFields;
 }
 
@@ -216,6 +215,7 @@ function collectRookMoves(selectedField, color, castling) {
 }
 
 function handleFigureMove(selectedField, currentField, params) {
+    params.eventBus.$emit('figureMovingStart');
     // move figure
     return updateTable(selectedField, currentField, params.table).then(() =>  {
         // delete a figure
@@ -256,6 +256,8 @@ function handleFigureMove(selectedField, currentField, params) {
             }
             return updateTable(rookSourceField, rookTargetField, params.table);
         }
+    }).finally(() => {
+        params.eventBus.$emit('figureMovingEnd');
     });
 }
 

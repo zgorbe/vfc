@@ -3,7 +3,8 @@
         <template v-for="row in table">
             <chess-field v-for="(cell, index) in row['.value']" v-bind:key="index + row['.key']" 
                 v-bind:figure="cell" v-bind:index="index + 1" v-bind:row="row['.key']" 
-                v-bind:getSelectedField="getSelectedField" v-on:selectField="setSelectedField" />
+                v-bind:getSelectedField="getSelectedField" v-bind:isFigureMoving="isFigureMoving"
+                v-on:selectField="setSelectedField" />
         </template>
     </div>
 </template>
@@ -25,7 +26,8 @@ export default {
                 row: 0, 
                 index: 0, 
                 figure: 'X'
-            }
+            },
+            figureMoving: false
         }
     },
     methods: {
@@ -63,7 +65,7 @@ export default {
                     rookMoves: []
                 }
             });
-
+            this.figureMoving = false;
             this.$root.$emit('newAvailableFields', []);
         },
         getSelectedField() {
@@ -73,6 +75,9 @@ export default {
             this.selectedField.row = row;
             this.selectedField.index = index;
             this.selectedField.figure = figure;
+        },
+        isFigureMoving() {
+            return this.figureMoving;
         }
     },      
     firebase: {
@@ -81,6 +86,8 @@ export default {
     created() {
         this.$root.$on('newGame', this.newGame);
         this.clearSelectedField();
+        this.$root.$on('figureMovingStart', () => this.figureMoving = true );
+        this.$root.$on('figureMovingEnd', () => this.figureMoving = false );
     }
 }
 </script>

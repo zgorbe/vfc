@@ -11,7 +11,7 @@ import chess from '../chess';
 import _ from 'lodash';
 
 export default {
-    props: ['figure', 'row', 'index', 'getSelectedField'],
+    props: ['figure', 'row', 'index', 'getSelectedField', 'isFigureMoving'],
     data() {
         return {
             available: false,
@@ -21,41 +21,43 @@ export default {
     mixins: [mixin],
     methods: {
         select() {
-            var selectedField = this.getSelectedField(),
-                currentField = {
-                    row: parseInt(this.row, 10),
-                    index: this.index,
-                    figure: this.figure
-                };
+            if (!this.isFigureMoving()) {
+                var selectedField = this.getSelectedField(),
+                    currentField = {
+                        row: parseInt(this.row, 10),
+                        index: this.index,
+                        figure: this.figure
+                    };
 
-            if (selectedField.figure != 'X') {
-                var promise = Promise.resolve();
-                if (this.available) {
-                    promise = chess.handleFigureMove(selectedField, currentField, {
-                        table: this.table,
-                        whoIsNext: this.whoIsNext, 
-                        castling: this.castling,
-                        eventBus: this.$root // "event bus"
+                if (selectedField.figure != 'X') {
+                    var promise = Promise.resolve();
+                    if (this.available) {
+                        promise = chess.handleFigureMove(selectedField, currentField, {
+                            table: this.table,
+                            whoIsNext: this.whoIsNext, 
+                            castling: this.castling,
+                            eventBus: this.$root // "event bus"
+                        });
+                    }
+                    // clear selection
+                    promise.then(() => {
+                        this.$emit('selectField', 0, 0, 'X');
+                        this.$root.$emit('newAvailableFields', []);
                     });
+                } else if (this.figure != 'X' && chess.getFigureColor(this.figure) == this.whoIsNext['.value']) {
+                    // do selection
+                    this.availableFields = chess.getAvailableFields(
+                        currentField,
+                        this.table.map(row => row['.value']),
+                        this.figure.toUpperCase() == 'K' ? this.castling : undefined
+                    );
+                    if (this.availableFields.length) {
+                        this.$emit('selectField', parseInt(this.row, 10), this.index, this.figure);
+                    } else {
+                        this.$emit('selectField', 0, 0, 'X');
+                    }
+                    this.$root.$emit('newAvailableFields', this.availableFields);
                 }
-                // clear selection
-                promise.then(() => {
-                    this.$emit('selectField', 0, 0, 'X');
-                    this.$root.$emit('newAvailableFields', []);
-                });
-            } else if (this.figure != 'X' && chess.getFigureColor(this.figure) == this.whoIsNext['.value']) {
-                // do selection
-                this.availableFields = chess.getAvailableFields(
-                    currentField,
-                    this.table.map(row => row['.value']),
-                    this.figure.toUpperCase() == 'K' ? this.castling : undefined
-                );
-                if (this.availableFields.length) {
-                    this.$emit('selectField', parseInt(this.row, 10), this.index, this.figure);
-                } else {
-                    this.$emit('selectField', 0, 0, 'X');
-                }
-                this.$root.$emit('newAvailableFields', this.availableFields);
             }
         },
         isSelected() {
