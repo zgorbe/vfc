@@ -118,7 +118,7 @@ function getFieldsInLShape(field, table) {
     ]
 }
 
-function getFieldsForPawn(field, table) {
+function getFieldsForPawn(field, table, lastMove) {
     var color = getFigureColor(field.figure),
         availableFields = [];
 
@@ -139,6 +139,16 @@ function getFieldsForPawn(field, table) {
         if (color == 'black' && field.row == 2) {
             fieldsInFront.push({ row: field.row + 2, index: field.index });
         }
+    }
+
+    // check if 'en passant' is possible
+    if (fieldsInFront.length == 1 && lastMove[0].figure.toUpperCase() == 'P' && 
+        Math.abs(lastMove[0].row - lastMove[1].row) > 1 &&
+        Math.abs(fieldsInFront[0].index - lastMove[0].index) == 1) {
+        fieldsInFront.push({ 
+            row: fieldsInFront[0].row, 
+            index: lastMove[0].index
+        });
     }
     _.each(fieldsInFront, field => {
         if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
@@ -217,7 +227,18 @@ function collectRookMoves(selectedField, color, castling) {
 }
 
 function handleFigureMove(selectedField, currentField, params) {
+    var isEnPassant = false;
+
     params.eventBus.$emit('figureMovingStart');
+
+    // if 'en passant'
+    if (selectedField.figure.toUpperCase() == 'P' && Math.abs(selectedField.index - currentField.index) == 1 &&
+        currentField.figure == 'X') {
+        isEnPassant = true;
+        currentField.row = selectedField.row;
+        currentField.figure = params.table[currentField.row - 1]['.value'].charAt(currentField.index - 1);
+    }
+
     // move figure
     return updateTable(selectedField, currentField, params.table).then(() =>  {
         // delete a figure
@@ -246,7 +267,7 @@ function handleFigureMove(selectedField, currentField, params) {
         }
         return whoIsNextRef.set(whoWasNext == 'white' ? 'black' : 'white');
     }).then(() => {
-        lastMoveRef.set([selectedField, currentField]);
+        !isEnPassant && lastMoveRef.set([selectedField, currentField]);
         // if castling then move the rook too
         if (selectedField.figure.toUpperCase() == 'K' && Math.abs(selectedField.index - currentField.index) > 1) {
             var rookSourceField = {
@@ -259,6 +280,14 @@ function handleFigureMove(selectedField, currentField, params) {
             }
             return updateTable(rookSourceField, rookTargetField, params.table);
         }
+        if (isEnPassant) {
+            var targetField = {
+                row: currentField.row + (getFigureColor(selectedField.figure) == 'black' ? 1 : -1),
+                index: currentField.index
+            }
+            lastMoveRef.set([selectedField, targetField]);
+            return updateTable(currentField, targetField, params.table);
+        }
     }).finally(() => {
         params.eventBus.$emit('figureMovingEnd');
     });
@@ -270,7 +299,7 @@ const chess = {
         return getFigureColor(figure);
     },
 
-    getAvailableFields(field, table, castling) {
+    getAvailableFields(field, table, lastMove, castling) {
         var config = moveConfig[field.figure.toLowerCase()],
             availableFields = [];
 
@@ -287,7 +316,7 @@ const chess = {
         }
 
         if (config.moveLikeAPawn) {
-            availableFields = _.concat(availableFields, getFieldsForPawn(field, table));
+            availableFields = _.concat(availableFields, getFieldsForPawn(field, table, lastMove));
         }
 
         if (castling) { // king is selected

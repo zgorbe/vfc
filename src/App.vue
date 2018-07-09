@@ -62,11 +62,12 @@ export default {
     margin-top: 20px;
 
     .buttons {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
+        text-align: center;
         button {
-            margin: 0 5px;
+            margin: 20px 5px 0 5px;
+            &.active {
+                background-color: #bbb;
+            }
         }
     }
 

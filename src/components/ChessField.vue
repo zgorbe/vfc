@@ -50,6 +50,7 @@ export default {
                     this.availableFields = chess.getAvailableFields(
                         currentField,
                         this.table.map(row => row['.value']),
+                        this.lastMove,
                         this.figure.toUpperCase() == 'K' ? this.castling : undefined
                     );
                     if (this.availableFields.length) {
