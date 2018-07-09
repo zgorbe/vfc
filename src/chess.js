@@ -8,6 +8,12 @@ import { lastMoveRef } from './firebase';
 
 import mixins from './mixins';
 
+export default {
+    getFigureColor,
+    getAvailableFields,
+    handleFigureMove
+}
+
 const moveConfig = {
     p : { moveLikeAPawn: true }, // pawn, maybe it has too special move... important whether black or white pawn
     b : { moveInVH : true }, // rook
@@ -21,47 +27,31 @@ function getFigureColor(figure) {
     return figure.toUpperCase() == figure ? 'white' : 'black';
 }
 
-function filterToNextFieldOnly(fields) {
-    return _.chain(fields).take(1).compact().value();
-}
+// getting the available fields for the figure of the given field
+function getAvailableFields(field, table, lastMove, castling) {
+    var config = moveConfig[field.figure.toLowerCase()],
+        availableFields = [];
 
-function filterValidFields(color, fields, table) {
-    var validFields = [];
-
-    _.each(fields, field => {
-        if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
-            return false;
-        }
-        var figure = table[field.row - 1].charAt(field.index - 1),
-            figureColor = getFigureColor(figure);
-        
-        if (figure == 'X') {
-            validFields.push(field);
-        } else {
-            if (color != figureColor) {
-                field.isAttackedField = true;
-                validFields.push(field);
-            }
-            return false;
-        }
-    });
-
-    return validFields;
-}
-
-function getValidAvailableFields(fields, table, moveToNextFieldOnly, color) {
-    var result = [];
-    if (moveToNextFieldOnly) {
-        for (var i = 0; i < fields.length; i++) {
-            fields[i] = filterToNextFieldOnly(fields[i]);
-        }
-    }
-    for (var i = 0; i < fields.length; i++) {
-        fields[i] = filterValidFields(color, fields[i], table);
-        result.push(...fields[i]);
+    if (config.moveInVH) {
+        availableFields = _.concat(availableFields, getFieldsInVH(field, table, config.moveToNextFieldOnly));
     }
 
-    return result;
+    if (config.moveInCross) {
+        availableFields = _.concat(availableFields, getFieldsInCross(field, table, config.moveToNextFieldOnly));
+    }
+
+    if (config.moveInLShape) {
+        availableFields = _.concat(availableFields, getFieldsInLShape(field, table));
+    }
+
+    if (config.moveLikeAPawn) {
+        availableFields = _.concat(availableFields, getFieldsForPawn(field, table, lastMove));
+    }
+
+    if (castling) { // king is selected
+        availableFields = _.concat(availableFields, getFieldsForCastling(field, table, castling));
+    }
+    return availableFields;
 }
 
 function getFieldsInVH(field, table, moveToNextFieldOnly) {
@@ -199,33 +189,50 @@ function getFieldsForCastling(field, table, castling) {
     return availableFields;
 }
 
-function updateTable(sourceField, targetField, vueFireTable) {
-    var isUpdateInSameRow = sourceField.row == targetField.row,
-        sourceRow = vueFireTable[sourceField.row - 1]['.value'],
-        figureToMove = sourceRow.charAt(sourceField.index - 1),
-        updatedSourceRow = mixins.methods.stringReplaceAt.call(null, sourceRow, 'X', sourceField.index - 1),
-        targetRow = isUpdateInSameRow ? updatedSourceRow : vueFireTable[targetField.row - 1]['.value'],
-        updatedTargetRow = mixins.methods.stringReplaceAt.call(null, targetRow, figureToMove, targetField.index - 1);
-        
-    return Promise.all([
-        isUpdateInSameRow ? Promise.resolve() : tableRef.child(sourceField.row).set(updatedSourceRow),
-        tableRef.child(targetField.row).set(updatedTargetRow)
-    ]);
+function filterToNextFieldOnly(fields) {
+    return _.chain(fields).take(1).compact().value();
 }
 
-function collectRookMoves(selectedField, color, castling) {
-    if ((color == 'black' && selectedField.row == 1 && (selectedField.index == 1 || selectedField.index == 8)) ||
-        (color == 'white' && selectedField.row == 8 && (selectedField.index == 1 || selectedField.index == 8))) {
-        var rookMoves = _.toArray(castling[color].rookMoves),
-            alreadyAdded = rookMoves.filter(field => {
-                return field.row == selectedField.row && field.index == selectedField.index;
-            }).length;
-        if (!alreadyAdded) {
-            castlingRef.child(color + '/rookMoves').push(selectedField);
+function filterValidFields(color, fields, table) {
+    var validFields = [];
+
+    _.each(fields, field => {
+        if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
+            return false;
+        }
+        var figure = table[field.row - 1].charAt(field.index - 1),
+            figureColor = getFigureColor(figure);
+        
+        if (figure == 'X') {
+            validFields.push(field);
+        } else {
+            if (color != figureColor) {
+                field.isAttackedField = true;
+                validFields.push(field);
+            }
+            return false;
+        }
+    });
+
+    return validFields;
+}
+
+function getValidAvailableFields(fields, table, moveToNextFieldOnly, color) {
+    var result = [];
+    if (moveToNextFieldOnly) {
+        for (var i = 0; i < fields.length; i++) {
+            fields[i] = filterToNextFieldOnly(fields[i]);
         }
     }
+    for (var i = 0; i < fields.length; i++) {
+        fields[i] = filterValidFields(color, fields[i], table);
+        result.push(...fields[i]);
+    }
+
+    return result;
 }
 
+// handling movement of figures, updating the chess table
 function handleFigureMove(selectedField, currentField, params) {
     var isEnPassant = false;
 
@@ -293,39 +300,29 @@ function handleFigureMove(selectedField, currentField, params) {
     });
 }
 
-
-const chess = {
-    getFigureColor(figure) {
-        return getFigureColor(figure);
-    },
-
-    getAvailableFields(field, table, lastMove, castling) {
-        var config = moveConfig[field.figure.toLowerCase()],
-            availableFields = [];
-
-        if (config.moveInVH) {
-            availableFields = _.concat(availableFields, getFieldsInVH(field, table, config.moveToNextFieldOnly));
-        }
-
-        if (config.moveInCross) {
-            availableFields = _.concat(availableFields, getFieldsInCross(field, table, config.moveToNextFieldOnly));
-        }
-
-        if (config.moveInLShape) {
-            availableFields = _.concat(availableFields, getFieldsInLShape(field, table));
-        }
-
-        if (config.moveLikeAPawn) {
-            availableFields = _.concat(availableFields, getFieldsForPawn(field, table, lastMove));
-        }
-
-        if (castling) { // king is selected
-            availableFields = _.concat(availableFields, getFieldsForCastling(field, table, castling));
-        }
-        return availableFields;
-    },
-
-    handleFigureMove: handleFigureMove
+function updateTable(sourceField, targetField, vueFireTable) {
+    var isUpdateInSameRow = sourceField.row == targetField.row,
+        sourceRow = vueFireTable[sourceField.row - 1]['.value'],
+        figureToMove = sourceRow.charAt(sourceField.index - 1),
+        updatedSourceRow = mixins.methods.stringReplaceAt.call(null, sourceRow, 'X', sourceField.index - 1),
+        targetRow = isUpdateInSameRow ? updatedSourceRow : vueFireTable[targetField.row - 1]['.value'],
+        updatedTargetRow = mixins.methods.stringReplaceAt.call(null, targetRow, figureToMove, targetField.index - 1);
+        
+    return Promise.all([
+        isUpdateInSameRow ? Promise.resolve() : tableRef.child(sourceField.row).set(updatedSourceRow),
+        tableRef.child(targetField.row).set(updatedTargetRow)
+    ]);
 }
 
-export default chess;
+function collectRookMoves(selectedField, color, castling) {
+    if ((color == 'black' && selectedField.row == 1 && (selectedField.index == 1 || selectedField.index == 8)) ||
+        (color == 'white' && selectedField.row == 8 && (selectedField.index == 1 || selectedField.index == 8))) {
+        var rookMoves = _.toArray(castling[color].rookMoves),
+            alreadyAdded = rookMoves.filter(field => {
+                return field.row == selectedField.row && field.index == selectedField.index;
+            }).length;
+        if (!alreadyAdded) {
+            castlingRef.child(color + '/rookMoves').push(selectedField);
+        }
+    }
+}

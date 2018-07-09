@@ -115,6 +115,10 @@ export default {
             padding: 50% 0;
         }
 
+        &.available, &.attacked {
+            cursor: pointer;
+        }
+        
         &.selected {
             background-color: #755 !important;
         }
@@ -128,10 +132,6 @@ export default {
     }
 
     &.highlighting .field {
-        &.available, &.attacked {
-            cursor: pointer;
-        }
-
         &.available:after, &.last:after {
             background-color: #050;
             bottom: 0;
