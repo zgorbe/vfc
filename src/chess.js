@@ -219,15 +219,16 @@ function filterValidFields(color, fields, table) {
 
 function getValidAvailableFields(fields, table, moveToNextFieldOnly, color) {
     var result = [];
+    
     if (moveToNextFieldOnly) {
-        for (var i = 0; i < fields.length; i++) {
-            fields[i] = filterToNextFieldOnly(fields[i]);
-        }
+        fields.forEach((field, index) => {
+            fields[index] = filterToNextFieldOnly(field);
+        });
     }
-    for (var i = 0; i < fields.length; i++) {
-        fields[i] = filterValidFields(color, fields[i], table);
-        result.push(...fields[i]);
-    }
+
+    fields.forEach(field => {
+        result.push(...filterValidFields(color, field, table));
+    });
 
     return result;
 }
@@ -304,9 +305,9 @@ function updateTable(sourceField, targetField, vueFireTable) {
     var isUpdateInSameRow = sourceField.row == targetField.row,
         sourceRow = vueFireTable[sourceField.row - 1]['.value'],
         figureToMove = sourceRow.charAt(sourceField.index - 1),
-        updatedSourceRow = mixins.methods.stringReplaceAt.call(null, sourceRow, 'X', sourceField.index - 1),
+        updatedSourceRow = mixins.methods.stringReplaceAt(sourceRow, 'X', sourceField.index - 1),
         targetRow = isUpdateInSameRow ? updatedSourceRow : vueFireTable[targetField.row - 1]['.value'],
-        updatedTargetRow = mixins.methods.stringReplaceAt.call(null, targetRow, figureToMove, targetField.index - 1);
+        updatedTargetRow = mixins.methods.stringReplaceAt(targetRow, figureToMove, targetField.index - 1);
         
     return Promise.all([
         isUpdateInSameRow ? Promise.resolve() : tableRef.child(sourceField.row).set(updatedSourceRow),
