@@ -11,7 +11,8 @@ import mixins from './mixins';
 export default {
     getFigureColor,
     getAvailableFields,
-    handleFigureMove
+    handleFigureMove,
+    isKingInCheck
 }
 
 const moveConfig = {
@@ -132,7 +133,7 @@ function getFieldsForPawn(field, table, lastMove) {
     }
 
     // check if 'en passant' is possible
-    if (fieldsInFront.length == 1 && lastMove[0].figure.toUpperCase() == 'P' && 
+    if (lastMove && fieldsInFront.length == 1 && lastMove[0].figure.toUpperCase() == 'P' && 
         Math.abs(lastMove[0].row - lastMove[1].row) > 1 &&
         Math.abs(fieldsInFront[0].index - lastMove[0].index) == 1) {
         fieldsInFront.push({ 
@@ -158,6 +159,7 @@ function getFieldsForPawn(field, table, lastMove) {
             figureColor = getFigureColor(figure);
         if (figure != 'X' && color != figureColor) {
             field.isAttackedField = true;
+            field.figure = figure;
             availableFields.push(field);
         }
     });
@@ -208,6 +210,7 @@ function filterValidFields(color, fields, table) {
         } else {
             if (color != figureColor) {
                 field.isAttackedField = true;
+                field.figure = figure;
                 validFields.push(field);
             }
             return false;
@@ -326,4 +329,42 @@ function collectRookMoves(selectedField, color, castling) {
             castlingRef.child(color + '/rookMoves').push(selectedField);
         }
     }
+}
+
+function isKingInCheck(color, table) {
+    var attackedFields = getAllAttackedFiedsByColor(color == 'black' ? 'white' : 'black', table);
+    return !!attackedFields.filter(field => field.figure.toUpperCase() == 'K').length;
+}
+
+function getAllAvailableFields(color, table) {
+    var fieldsByColor = getAllFieldsByColor(color, table),
+        allAvailableFields = [];
+    
+    fieldsByColor.forEach(field => {
+        allAvailableFields.push(...getAvailableFields(field, table));
+    });
+
+    return allAvailableFields;
+}
+
+function getAllAttackedFiedsByColor(color, table) {
+    return getAllAvailableFields(color, table).filter(field => field.isAttackedField);
+}
+
+function getAllFieldsByColor(color, table) {
+    var fieldsByColor = [];
+    
+    table.forEach((row, rowIndex)  => {
+        for (var i = 0; i < row.length; i++) {
+            if (row.charAt(i) != 'X' && getFigureColor(row.charAt(i)) == color) {
+                fieldsByColor.push({
+                    row: rowIndex + 1,
+                    index: i + 1,
+                    figure: row.charAt(i)
+                });
+            }
+        }
+    });
+
+    return fieldsByColor;
 }

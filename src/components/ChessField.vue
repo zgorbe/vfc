@@ -44,6 +44,9 @@ export default {
                     promise.then(() => {
                         this.$emit('selectField', 0, 0, 'X');
                         this.$root.$emit('newAvailableFields', []);
+                        if (chess.isKingInCheck(this.whoIsNext['.value'], this.table.map(row => row['.value']))) {
+                            alert('Check!');
+                        }
                     });
                 } else if (this.figure != 'X' && chess.getFigureColor(this.figure) == this.whoIsNext['.value']) {
                     // do selection
