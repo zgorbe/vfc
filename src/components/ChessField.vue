@@ -50,12 +50,18 @@ export default {
                     });
                 } else if (this.figure != 'X' && chess.getFigureColor(this.figure) == this.whoIsNext['.value']) {
                     // do selection
-                    this.availableFields = chess.getAvailableFields(
+                    var availableFields = [],
+                        table = this.table.map(row => row['.value']);
+
+                    availableFields = chess.getAvailableFields(
                         currentField,
-                        this.table.map(row => row['.value']),
+                        table,
                         this.lastMove,
                         this.figure.toUpperCase() == 'K' ? this.castling : undefined
                     );
+
+                    this.availableFields = chess.filterForCheckAfterMove(currentField, availableFields, table);
+
                     if (this.availableFields.length) {
                         this.$emit('selectField', parseInt(this.row, 10), this.index, this.figure);
                     } else {

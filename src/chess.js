@@ -12,7 +12,8 @@ export default {
     getFigureColor,
     getAvailableFields,
     handleFigureMove,
-    isKingInCheck
+    isKingInCheck,
+    filterForCheckAfterMove
 }
 
 const moveConfig = {
@@ -52,6 +53,7 @@ function getAvailableFields(field, table, lastMove, castling) {
     if (castling) { // king is selected
         availableFields = _.concat(availableFields, getFieldsForCastling(field, table, castling));
     }
+
     return availableFields;
 }
 
@@ -174,7 +176,7 @@ function getFieldsForCastling(field, table, castling) {
     if (!castling[color].isKingMoved) {
         var row = color == 'black' ? 1 : 8;
         availableFields = getValidAvailableFields(
-            [[{ row: row, index: 3 }], [{ row: row, index: 7 }]],
+            [[{ row: row, index: 3 }, { row: row, index: 4 }], [{ row: row, index: 6 }, { row: row, index: 7 }]],
             table,
             false, 
             color
@@ -234,6 +236,25 @@ function getValidAvailableFields(fields, table, moveToNextFieldOnly, color) {
     });
 
     return result;
+}
+
+function filterForCheckAfterMove(field, availableFields, table) {
+    var color = getFigureColor(field.figure);
+
+    return availableFields.filter(availableField => {
+        var resultTable = table.slice(),
+            isUpdateInSameRow = field.row == availableField.row,
+            sourceRow = resultTable[field.row - 1],
+            figureToMove = sourceRow.charAt(field.index - 1),
+            updatedSourceRow = mixins.methods.stringReplaceAt(sourceRow, 'X', field.index - 1),
+            targetRow = isUpdateInSameRow ? updatedSourceRow : resultTable[availableField.row - 1],
+            updatedTargetRow = mixins.methods.stringReplaceAt(targetRow, figureToMove, availableField.index - 1);
+
+        resultTable[field.row - 1] = updatedSourceRow;
+        resultTable[availableField.row - 1] = updatedTargetRow;
+
+        return !isKingInCheck(color, resultTable);
+    });
 }
 
 // handling movement of figures, updating the chess table
@@ -356,11 +377,12 @@ function getAllFieldsByColor(color, table) {
     
     table.forEach((row, rowIndex)  => {
         for (var i = 0; i < row.length; i++) {
-            if (row.charAt(i) != 'X' && getFigureColor(row.charAt(i)) == color) {
+            var figure = row.charAt(i);
+            if (figure != 'X' && getFigureColor(figure) == color) {
                 fieldsByColor.push({
                     row: rowIndex + 1,
                     index: i + 1,
-                    figure: row.charAt(i)
+                    figure: figure
                 });
             }
         }
