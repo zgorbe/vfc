@@ -44,20 +44,22 @@ export default {
                     promise.then(() => {
                         this.$emit('selectField', 0, 0, 'X');
                         this.$root.$emit('newAvailableFields', []);
+                        // TODO: check if figure selection happens, in that case the check should be verified after figure selection
                         if (chess.isKingInCheck(this.whoIsNext['.value'], this.table.map(row => row['.value']))) {
-                            alert('Check!');
+                            this.$root.$emit('check');
                         }
                     });
                 } else if (this.figure != 'X' && chess.getFigureColor(this.figure) == this.whoIsNext['.value']) {
                     // do selection
                     var availableFields = [],
-                        table = this.table.map(row => row['.value']);
+                        table = this.table.map(row => row['.value']),
+                        isKingSelected = this.figure.toUpperCase() == 'K';
 
                     availableFields = chess.getAvailableFields(
                         currentField,
                         table,
                         this.lastMove,
-                        this.figure.toUpperCase() == 'K' ? this.castling : undefined
+                        isKingSelected ? this.castling : undefined
                     );
 
                     this.availableFields = chess.filterForCheckAfterMove(currentField, availableFields, table);

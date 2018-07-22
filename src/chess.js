@@ -188,6 +188,7 @@ function getFieldsForCastling(field, table, castling) {
                 return move.row == row && move.index == index;
             }).length;
         });
+        // TODO: check if currently king is in check because castling is not allowed in that case
     }
 
     return availableFields;
@@ -239,9 +240,11 @@ function getValidAvailableFields(fields, table, moveToNextFieldOnly, color) {
 }
 
 function filterForCheckAfterMove(field, availableFields, table) {
-    var color = getFigureColor(field.figure);
+    var color = getFigureColor(field.figure),
+        isKingSelected = field.figure.toUpperCase() == 'K';
 
-    return availableFields.filter(availableField => {
+    // TODO: filter for check when castling
+    var result = availableFields.filter(availableField => {
         var resultTable = table.slice(),
             isUpdateInSameRow = field.row == availableField.row,
             sourceRow = resultTable[field.row - 1],
@@ -255,6 +258,24 @@ function filterForCheckAfterMove(field, availableFields, table) {
 
         return !isKingInCheck(color, resultTable);
     });
+
+    if (isKingSelected) {
+        var nextFields = result.filter(availableField => {
+            return Math.abs(field.index - availableField.index) == 1;
+        });
+        
+        result = result.filter(availableField => {
+            if (Math.abs(field.index - availableField.index) > 1) {
+                var fieldIndex = field.index - availableField.index < 0 ? field.index + 1 : field.index - 1;
+                return nextFields.filter(nextField => {
+                    return nextField.index == fieldIndex && nextField.row == field.row;
+                }).length;
+            }
+
+            return true;
+        });
+    }
+    return result;
 }
 
 // handling movement of figures, updating the chess table

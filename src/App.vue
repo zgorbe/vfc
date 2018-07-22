@@ -21,7 +21,10 @@
     <b-modal id="newGameConfirmation" title="New Game" ok-title="Yes" cancel-title="No" v-on:ok="newGame">
         <p class="text-center">Would you like to start a new game?</p>
     </b-modal>
-    <figure-selector></figure-selector> 
+    <figure-selector></figure-selector>
+    <b-modal ref="checkAlertRef" title="Check Alert" hide-footer hide-header>
+        <h2 class="text-center">Check!</h2>
+    </b-modal>
   </div>
 </template>
 
@@ -52,7 +55,15 @@ export default {
                 this.loading = false;
             }
         }
-    }  
+    },
+    created() {
+        this.$root.$on('check', () => {
+            this.$refs.checkAlertRef.show();
+            setTimeout(() => {
+                this.$refs.checkAlertRef.hide();
+            }, 2000);
+        });
+    } 
 }
 </script>
 
