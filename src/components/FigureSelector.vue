@@ -9,6 +9,7 @@
 <script>
 import { tableRef } from '../firebase';
 import mixin from '../mixins';
+import chess from '../chess';
 
 export default {
     mixins: [mixin],
@@ -28,7 +29,12 @@ export default {
                 
             tableRef.child(this.row)
                 .set(resultRow)
-                .then(this.$refs.figureSelector.hide);
+                .then(this.$refs.figureSelector.hide)
+                .then(() => {
+                    if (chess.isKingInCheck(this.color == 'v' ? 'black' : 'white', this.table.map(row => row['.value']))) {
+                        this.$root.$emit('check');
+                    }
+                });
         },
         showFigureSelector(color, row, index) {
             this.color = color == 'white' ? 'v' : 'f';
@@ -43,7 +49,7 @@ export default {
         table: tableRef
     },
     created() {
-        this.$root.$on('figureSelection', this.showFigureSelector);
+        this.$root.$on('figureSelectionStart', this.showFigureSelector);
     }
 }
 </script>

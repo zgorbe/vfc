@@ -53,6 +53,17 @@ export default {
             source: tableRef,
             readyCallback() {
                 this.loading = false;
+                
+                var whitePawnIndex = this.table[0]['.value'].indexOf('P'),
+                    blackPawnIndex = this.table[7]['.value'].indexOf('p');
+
+                if (whitePawnIndex > -1) {
+                    this.$root.$emit('figureSelectionStart', 'white', 1, whitePawnIndex + 1);                    
+                }
+
+                if (blackPawnIndex > -1) {
+                    this.$root.$emit('figureSelectionStart', 'black', 8, blackPawnIndex + 1);                    
+                }
             }
         }
     },

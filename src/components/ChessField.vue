@@ -9,7 +9,6 @@ import { castlingRef } from '../firebase';
 import { lastMoveRef } from '../firebase';
 import mixin from '../mixins';
 import chess from '../chess';
-import _ from 'lodash';
 
 export default {
     props: ['figure', 'row', 'index', 'getSelectedField', 'isFigureMoving'],
@@ -42,12 +41,12 @@ export default {
                     }
                     // clear selection
                     promise.then(() => {
+                        if (!chess.isFigureSelection(selectedField, currentField) &&
+                            chess.isKingInCheck(this.whoIsNext['.value'], this.table.map(row => row['.value']))) {
+                                this.$root.$emit('check');
+                        }
                         this.$emit('selectField', 0, 0, 'X');
                         this.$root.$emit('newAvailableFields', []);
-                        // TODO: check if figure selection happens, in that case the check should be verified after figure selection
-                        if (chess.isKingInCheck(this.whoIsNext['.value'], this.table.map(row => row['.value']))) {
-                            this.$root.$emit('check');
-                        }
                     });
                 } else if (this.figure != 'X' && chess.getFigureColor(this.figure) == this.whoIsNext['.value']) {
                     // do selection
@@ -107,14 +106,14 @@ export default {
     created() {
         this.$root.$on('newAvailableFields', (availableFields) => {
             var available = false;
-            _.each(availableFields, field => {
+            for (let field of availableFields) {
                 if (field.row == this.row && field.index == this.index) {
                     available = true;
                     this.attacked = field.isAttackedField;
 
-                    return false;
+                    break
                 }
-            });
+            }
             this.available = available;
 
             if (!this.available) {

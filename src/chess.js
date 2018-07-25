@@ -13,7 +13,8 @@ export default {
     getAvailableFields,
     handleFigureMove,
     isKingInCheck,
-    filterForCheckAfterMove
+    filterForCheckAfterMove,
+    isFigureSelection
 }
 
 const moveConfig = {
@@ -173,7 +174,7 @@ function getFieldsForCastling(field, table, castling) {
     var color = getFigureColor(field.figure),
         availableFields = [];
 
-    if (!castling[color].isKingMoved) {
+    if (!isKingInCheck(color, table) && !castling[color].isKingMoved) {
         var row = color == 'black' ? 1 : 8;
         availableFields = getValidAvailableFields(
             [[{ row: row, index: 3 }, { row: row, index: 4 }], [{ row: row, index: 6 }, { row: row, index: 7 }]],
@@ -188,7 +189,6 @@ function getFieldsForCastling(field, table, castling) {
                 return move.row == row && move.index == index;
             }).length;
         });
-        // TODO: check if currently king is in check because castling is not allowed in that case
     }
 
     return availableFields;
@@ -243,7 +243,6 @@ function filterForCheckAfterMove(field, availableFields, table) {
     var color = getFigureColor(field.figure),
         isKingSelected = field.figure.toUpperCase() == 'K';
 
-    // TODO: filter for check when castling
     var result = availableFields.filter(availableField => {
         var resultTable = table.slice(),
             isUpdateInSameRow = field.row == availableField.row,
@@ -303,11 +302,10 @@ function handleFigureMove(selectedField, currentField, params) {
             }
         }
         // trigger figure selection if needed
-        if ((selectedField.figure == 'P' && currentField.row == 1) || 
-            (selectedField.figure == 'p' && currentField.row == 8)) {
-            
-            params.eventBus.$emit('figureSelection', getFigureColor(selectedField.figure), currentField.row, currentField.index);
+        if (isFigureSelection(selectedField, currentField)) {
+            params.eventBus.$emit('figureSelectionStart', getFigureColor(selectedField.figure), currentField.row, currentField.index);
         }
+
         var whoWasNext = params.whoIsNext['.value'];
         // king is not moved yet
         if (!params.castling[whoWasNext].isKingMoved) {
@@ -371,6 +369,10 @@ function collectRookMoves(selectedField, color, castling) {
             castlingRef.child(color + '/rookMoves').push(selectedField);
         }
     }
+}
+
+function isFigureSelection(selectedField, currentField) {
+    return (selectedField.figure == 'P' && currentField.row == 1) || (selectedField.figure == 'p' && currentField.row == 8);
 }
 
 function isKingInCheck(color, table) {
