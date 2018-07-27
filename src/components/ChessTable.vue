@@ -16,6 +16,7 @@ import { deletedBlacksRef } from '../firebase';
 import { whoIsNextRef } from '../firebase';
 import { castlingRef } from '../firebase';
 import { lastMoveRef } from '../firebase';
+import { checkRef } from '../firebase';
 
 import mixin from '../mixins';
 
@@ -69,6 +70,7 @@ export default {
             
             lastMoveRef.set([]);
 
+            checkRef.set(false);
             this.figureMoving = false;
             this.$root.$emit('newAvailableFields', []);
         },
@@ -85,13 +87,24 @@ export default {
         }
     },      
     firebase: {
-        table: tableRef
+        table: tableRef,
+        whoIsNext: {
+            source: whoIsNextRef,
+            asObject: true
+        }
     },
     created() {
         this.$root.$on('newGame', this.newGame);
         this.clearSelectedField();
         this.$root.$on('figureMovingStart', () => this.figureMoving = true );
         this.$root.$on('figureMovingEnd', () => this.figureMoving = false );
+
+        this.$root.$on('check', () => {
+            checkRef.set(true);
+            setTimeout(() => {
+                checkRef.set(false);
+            }, 2000);
+        });
     }
 }
 </script>

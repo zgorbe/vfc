@@ -17,3 +17,4 @@ export const deletedBlacksRef = db.ref('deletedBlacks');
 export const whoIsNextRef = db.ref('whoIsNext');
 export const castlingRef = db.ref('castling');
 export const lastMoveRef = db.ref('lastMove');
+export const checkRef = db.ref('check');
