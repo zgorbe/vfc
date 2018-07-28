@@ -21,16 +21,23 @@
     <b-modal id="newGameConfirmation" title="New Game" ok-title="Yes" cancel-title="No" v-on:ok="newGame">
         <p class="text-center">Would you like to start a new game?</p>
     </b-modal>
-    <figure-selector></figure-selector>
     <b-modal v-model="check['.value']" hide-footer hide-header>
         <h2 class="text-center">Check!</h2>
     </b-modal>
+    <b-modal v-model="mate['.value']" hide-footer no-close-on-backdrop>
+        <h2 class="text-center">Checkmate!</h2>
+        <p class="text-center">
+            <b-btn v-on:click="newGame">New Game</b-btn>
+        </p>
+    </b-modal>
+    <figure-selector></figure-selector>
   </div>
 </template>
 
 <script>
 import { tableRef } from './firebase';
 import { checkRef } from './firebase';
+import { mateRef } from './firebase';
 
 export default {
     name: 'App',
@@ -69,6 +76,10 @@ export default {
         },
         check: { 
             source: checkRef,
+            asObject: true
+        },
+        mate: { 
+            source: mateRef,
             asObject: true
         }
     } 

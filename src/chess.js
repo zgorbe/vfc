@@ -14,7 +14,8 @@ export default {
     handleFigureMove,
     isKingInCheck,
     filterForCheckAfterMove,
-    isFigureSelection
+    isFigureSelection,
+    isCheckMate
 }
 
 const moveConfig = {
@@ -412,4 +413,20 @@ function getAllFieldsByColor(color, table) {
     });
 
     return fieldsByColor;
+}
+
+function isCheckMate(color, table) {
+    var fieldsByColor = getAllFieldsByColor(color, table);
+
+    for (let field of fieldsByColor) {
+        var availableFields = getAvailableFields(field, table);
+
+        availableFields = filterForCheckAfterMove(field, availableFields, table);
+        
+        if (availableFields.length) {
+            return false;
+        }
+    }
+
+    return true;
 }

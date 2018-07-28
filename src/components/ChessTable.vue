@@ -17,8 +17,10 @@ import { whoIsNextRef } from '../firebase';
 import { castlingRef } from '../firebase';
 import { lastMoveRef } from '../firebase';
 import { checkRef } from '../firebase';
+import { mateRef } from '../firebase';
 
 import mixin from '../mixins';
+import chess from '../chess';
 
 export default {
     mixins: [mixin],
@@ -71,6 +73,8 @@ export default {
             lastMoveRef.set([]);
 
             checkRef.set(false);
+            mateRef.set(false);
+
             this.figureMoving = false;
             this.$root.$emit('newAvailableFields', []);
         },
@@ -103,6 +107,10 @@ export default {
             checkRef.set(true);
             setTimeout(() => {
                 checkRef.set(false);
+
+                if (chess.isCheckMate(this.whoIsNext['.value'], this.table.map(row => row['.value']))) {
+                    mateRef.set(true);
+                }
             }, 2000);
         });
     }
