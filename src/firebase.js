@@ -19,3 +19,4 @@ export const castlingRef = db.ref('castling');
 export const lastMoveRef = db.ref('lastMove');
 export const checkRef = db.ref('check');
 export const mateRef = db.ref('mate');
+export const drawRef = db.ref('draw');

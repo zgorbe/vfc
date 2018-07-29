@@ -24,8 +24,16 @@
     <b-modal v-model="check['.value']" hide-footer hide-header>
         <h2 class="text-center">Check!</h2>
     </b-modal>
+    <!-- Checkmate and Draw should be done with one modal -->
     <b-modal v-model="mate['.value']" hide-footer no-close-on-backdrop>
         <h2 class="text-center">Checkmate!</h2>
+        <h2 class="text-center">Draw!</h2>
+        <p class="text-center">
+            <b-btn v-on:click="newGame">New Game</b-btn>
+        </p>
+    </b-modal>
+    <b-modal v-model="draw['.value']" hide-footer no-close-on-backdrop>
+        <h2 class="text-center">Draw!</h2>
         <p class="text-center">
             <b-btn v-on:click="newGame">New Game</b-btn>
         </p>
@@ -38,6 +46,7 @@
 import { tableRef } from './firebase';
 import { checkRef } from './firebase';
 import { mateRef } from './firebase';
+import { drawRef } from './firebase';
 
 export default {
     name: 'App',
@@ -80,6 +89,10 @@ export default {
         },
         mate: { 
             source: mateRef,
+            asObject: true
+        },
+        draw: { 
+            source: drawRef,
             asObject: true
         }
     } 

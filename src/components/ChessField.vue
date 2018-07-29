@@ -41,9 +41,15 @@ export default {
                     }
                     // clear selection
                     promise.then(() => {
-                        if (!chess.isFigureSelection(selectedField, currentField) &&
-                            chess.isKingInCheck(this.whoIsNext['.value'], this.table.map(row => row['.value']))) {
+                        if (!chess.isFigureSelection(selectedField, currentField)) {
+                            let table = this.table.map(row => row['.value']);
+                            if (chess.isKingInCheck(this.whoIsNext['.value'], table)) {
                                 this.$root.$emit('check');
+                            } else {
+                                if (!chess.isAnyMoveAvailable(this.whoIsNext['.value'], table)) {
+                                    this.$root.$emit('draw');
+                                }                                
+                            }
                         }
                         this.$emit('selectField', 0, 0, 'X');
                         this.$root.$emit('newAvailableFields', []);

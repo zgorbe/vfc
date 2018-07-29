@@ -31,8 +31,15 @@ export default {
                 .set(resultRow)
                 .then(this.$refs.figureSelector.hide)
                 .then(() => {
-                    if (chess.isKingInCheck(this.color == 'v' ? 'black' : 'white', this.table.map(row => row['.value']))) {
+                    let nextColor = this.color == 'v' ? 'black' : 'white',
+                        table = this.table.map(row => row['.value']);
+
+                    if (chess.isKingInCheck(nextColor, table)) {
                         this.$root.$emit('check');
+                    } else {
+                        if (!chess.isAnyMoveAvailable(nextColor, table)) {
+                            this.$root.$emit('draw');
+                        }
                     }
                 });
         },
