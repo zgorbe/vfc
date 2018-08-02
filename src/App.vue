@@ -27,7 +27,6 @@
     <!-- Checkmate and Draw should be done with one modal -->
     <b-modal v-model="mate['.value']" hide-footer no-close-on-backdrop>
         <h2 class="text-center">Checkmate!</h2>
-        <h2 class="text-center">Draw!</h2>
         <p class="text-center">
             <b-btn v-on:click="newGame">New Game</b-btn>
         </p>

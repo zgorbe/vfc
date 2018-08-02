@@ -416,7 +416,8 @@ function getAllFieldsByColor(color, table) {
 }
 
 function isAnyMoveAvailable(color, table) {
-    var fieldsByColor = getAllFieldsByColor(color, table);
+    var fieldsByColor = getAllFieldsByColor(color, table),
+        isAnyMoveAvailable = false;
 
     for (let field of fieldsByColor) {
         var availableFields = getAvailableFields(field, table);
@@ -424,9 +425,10 @@ function isAnyMoveAvailable(color, table) {
         availableFields = filterForCheckAfterMove(field, availableFields, table);
         
         if (availableFields.length) {
-            return false;
+            isAnyMoveAvailable = true;
+            break;
         }
     }
 
-    return true;
+    return isAnyMoveAvailable;
 }

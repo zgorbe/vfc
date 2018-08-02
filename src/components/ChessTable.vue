@@ -106,14 +106,14 @@ export default {
         this.$root.$on('figureMovingEnd', () => this.figureMoving = false );
 
         this.$root.$on('check', () => {
-            checkRef.set(true);
-            setTimeout(() => {
-                checkRef.set(false);
-
-                if (chess.isAnyMoveAvailable(this.whoIsNext['.value'], this.table.map(row => row['.value']))) {
-                    mateRef.set(true);
-                }
-            }, 2000);
+            if (!chess.isAnyMoveAvailable(this.whoIsNext['.value'], this.table.map(row => row['.value']))) {
+                mateRef.set(true);
+            } else {
+                checkRef.set(true);
+                setTimeout(() => {
+                    checkRef.set(false);
+                }, 2000);
+            }
         });
 
         this.$root.$on('draw', () => {

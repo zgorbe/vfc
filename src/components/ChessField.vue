@@ -37,20 +37,21 @@ export default {
                             whoIsNext: this.whoIsNext, 
                             castling: this.castling,
                             eventBus: this.$root // "event bus"
+                        }).then(() => {
+                            if (!chess.isFigureSelection(selectedField, currentField)) {
+                                let table = this.table.map(row => row['.value']);
+                                if (chess.isKingInCheck(this.whoIsNext['.value'], table)) {
+                                    this.$root.$emit('check');
+                                } else {
+                                    if (!chess.isAnyMoveAvailable(this.whoIsNext['.value'], table)) {
+                                        this.$root.$emit('draw');
+                                    }                                
+                                }
+                            }
                         });
                     }
                     // clear selection
                     promise.then(() => {
-                        if (!chess.isFigureSelection(selectedField, currentField)) {
-                            let table = this.table.map(row => row['.value']);
-                            if (chess.isKingInCheck(this.whoIsNext['.value'], table)) {
-                                this.$root.$emit('check');
-                            } else {
-                                if (!chess.isAnyMoveAvailable(this.whoIsNext['.value'], table)) {
-                                    this.$root.$emit('draw');
-                                }                                
-                            }
-                        }
                         this.$emit('selectField', 0, 0, 'X');
                         this.$root.$emit('newAvailableFields', []);
                     });
