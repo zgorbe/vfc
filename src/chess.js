@@ -37,23 +37,23 @@ function getAvailableFields(field, table, lastMove, castling) {
         availableFields = [];
 
     if (config.moveInVH) {
-        availableFields = _.concat(availableFields, getFieldsInVH(field, table, config.moveToNextFieldOnly));
+        availableFields.push(...getFieldsInVH(field, table, config.moveToNextFieldOnly));
     }
 
     if (config.moveInCross) {
-        availableFields = _.concat(availableFields, getFieldsInCross(field, table, config.moveToNextFieldOnly));
+        availableFields.push(...getFieldsInCross(field, table, config.moveToNextFieldOnly));
     }
 
     if (config.moveInLShape) {
-        availableFields = _.concat(availableFields, getFieldsInLShape(field, table));
+        availableFields.push(...getFieldsInLShape(field, table));
     }
 
     if (config.moveLikeAPawn) {
-        availableFields = _.concat(availableFields, getFieldsForPawn(field, table, lastMove));
+        availableFields.push(...getFieldsForPawn(field, table, lastMove));
     }
 
     if (castling) { // king is selected
-        availableFields = _.concat(availableFields, getFieldsForCastling(field, table, castling));
+        availableFields.push(...getFieldsForCastling(field, table, castling));
     }
 
     return availableFields;
@@ -145,19 +145,19 @@ function getFieldsForPawn(field, table, lastMove) {
             index: lastMove[0].index
         });
     }
-    _.each(fieldsInFront, field => {
+    for (let field of fieldsInFront) {
         if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
-            return;
+            break;
         }
         var figure = table[field.row - 1].charAt(field.index - 1);
         if (figure == 'X') {
             availableFields.push(field);
         }
-    });
+    }
 
-    _.each(fieldsInCross, field => {
+    for (let field of fieldsInCross) {
         if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
-            return;
+            break;
         }
         var figure = table[field.row - 1].charAt(field.index - 1),
             figureColor = getFigureColor(figure);
@@ -166,7 +166,7 @@ function getFieldsForPawn(field, table, lastMove) {
             field.figure = figure;
             availableFields.push(field);
         }
-    });
+    }
 
     return availableFields;
 }
@@ -202,9 +202,9 @@ function filterToNextFieldOnly(fields) {
 function filterValidFields(color, fields, table) {
     var validFields = [];
 
-    _.each(fields, field => {
+    for (let field of fields) {
         if (field.row < 1 || field.row > 8 || field.index < 1 || field.index > 8) {
-            return false;
+            break;
         }
         var figure = table[field.row - 1].charAt(field.index - 1),
             figureColor = getFigureColor(figure);
@@ -217,9 +217,9 @@ function filterValidFields(color, fields, table) {
                 field.figure = figure;
                 validFields.push(field);
             }
-            return false;
+            break;
         }
-    });
+    }
 
     return validFields;
 }
