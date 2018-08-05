@@ -24,19 +24,8 @@
     <b-modal v-model="check['.value']" hide-footer hide-header>
         <h2 class="text-center">Check!</h2>
     </b-modal>
-    <!-- Checkmate and Draw should be done with one modal -->
-    <b-modal v-model="mate['.value']" hide-footer no-close-on-backdrop>
-        <h2 class="text-center">Checkmate!</h2>
-        <p class="text-center">
-            <b-btn v-on:click="newGame">New Game</b-btn>
-        </p>
-    </b-modal>
-    <b-modal v-model="draw['.value']" hide-footer no-close-on-backdrop>
-        <h2 class="text-center">Draw!</h2>
-        <p class="text-center">
-            <b-btn v-on:click="newGame">New Game</b-btn>
-        </p>
-    </b-modal>
+    <game-ended-modal v-if="mate['.value']" message="Checkmate!"></game-ended-modal>
+    <game-ended-modal v-if="draw['.value']" message="Draw!"></game-ended-modal>
     <figure-selector></figure-selector>
   </div>
 </template>
