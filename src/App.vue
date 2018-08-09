@@ -17,6 +17,9 @@
           <b-btn :pressed.sync="highlighting">Toggle Highlighting</b-btn>
         </div>
       </div>
+      <div class="row">
+        <p class="col-12 note">Chess figure images are used from&nbsp;<a href="https://github.com/pychess/pychess" target="_blank">PyChess</a></p>
+      </div>
     </div>
     <b-modal id="newGameConfirmation" title="New Game" ok-title="Yes" cancel-title="No" v-on:ok="newGame">
         <p class="text-center">Would you like to start a new game?</p>
@@ -120,6 +123,11 @@ export default {
         .field, .modal, .figure-container .figure {
             transform: rotate(180deg);
         }
+    }
+    .note {
+        font-style: italic;
+        margin-top: 20px;
+        text-align: center;
     }
 }
 </style>
