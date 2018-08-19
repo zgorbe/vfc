@@ -1,17 +1,9 @@
 import _ from 'lodash';
-import { tableRef } from './firebase';
-import { deletedWhitesRef } from './firebase';
-import { deletedBlacksRef } from './firebase';
-import { whoIsNextRef } from './firebase';
-import { castlingRef } from './firebase';
-import { lastMoveRef } from './firebase';
-
 import mixins from './mixins';
 
 export default {
     getFigureColor,
     getAvailableFields,
-    handleFigureMove,
     isKingInCheck,
     filterForCheckAfterMove,
     isFigureSelection,
@@ -276,100 +268,6 @@ function filterForCheckAfterMove(field, availableFields, table) {
         });
     }
     return result;
-}
-
-// handling movement of figures, updating the chess table
-function handleFigureMove(selectedField, currentField, params) {
-    var isEnPassant = false;
-
-    params.eventBus.$emit('figureMovingStart');
-
-    // if 'en passant'
-    if (selectedField.figure.toUpperCase() == 'P' && Math.abs(selectedField.index - currentField.index) == 1 &&
-        currentField.figure == 'X') {
-        isEnPassant = true;
-        currentField.row = selectedField.row;
-        currentField.figure = params.table[currentField.row - 1]['.value'].charAt(currentField.index - 1);
-    }
-
-    // move figure
-    return updateTable(selectedField, currentField, params.table).then(() =>  {
-        // delete a figure
-        if (currentField.figure != 'X') {
-            if (getFigureColor(currentField.figure) == 'black') {
-                deletedBlacksRef.push(currentField.figure);
-            } else {
-                deletedWhitesRef.push(currentField.figure);
-            }
-        }
-        // trigger figure selection if needed
-        if (isFigureSelection(selectedField, currentField)) {
-            params.eventBus.$emit('figureSelectionStart', getFigureColor(selectedField.figure), currentField.row, currentField.index);
-        }
-
-        var whoWasNext = params.whoIsNext['.value'];
-        // king is not moved yet
-        if (!params.castling[whoWasNext].isKingMoved) {
-            if (selectedField.figure.toUpperCase() == 'B') { // rook is moved
-                collectRookMoves(selectedField, whoWasNext, params.castling);
-            }
-            if (selectedField.figure.toUpperCase() == 'K') {
-                castlingRef.child(whoWasNext + '/isKingMoved').set(true);
-            }
-        }
-        return whoIsNextRef.set(whoWasNext == 'white' ? 'black' : 'white');
-    }).then(() => {
-        !isEnPassant && lastMoveRef.set([selectedField, currentField]);
-        // if castling then move the rook too
-        if (selectedField.figure.toUpperCase() == 'K' && Math.abs(selectedField.index - currentField.index) > 1) {
-            var rookSourceField = {
-                row: getFigureColor(selectedField.figure) == 'black' ? 1 : 8,
-                index: currentField.index == 3 ? 1 : 8
-            }
-            var rookTargetField = {
-                row: rookSourceField.row,
-                index: currentField.index == 3 ? 4 : 6
-            }
-            return updateTable(rookSourceField, rookTargetField, params.table);
-        }
-        if (isEnPassant) {
-            var targetField = {
-                row: currentField.row + (getFigureColor(selectedField.figure) == 'black' ? 1 : -1),
-                index: currentField.index
-            }
-            lastMoveRef.set([selectedField, targetField]);
-            return updateTable(currentField, targetField, params.table);
-        }
-    }).finally(() => {
-        params.eventBus.$emit('figureMovingEnd');
-    });
-}
-
-function updateTable(sourceField, targetField, vueFireTable) {
-    var isUpdateInSameRow = sourceField.row == targetField.row,
-        sourceRow = vueFireTable[sourceField.row - 1]['.value'],
-        figureToMove = sourceRow.charAt(sourceField.index - 1),
-        updatedSourceRow = mixins.methods.stringReplaceAt(sourceRow, 'X', sourceField.index - 1),
-        targetRow = isUpdateInSameRow ? updatedSourceRow : vueFireTable[targetField.row - 1]['.value'],
-        updatedTargetRow = mixins.methods.stringReplaceAt(targetRow, figureToMove, targetField.index - 1);
-        
-    return Promise.all([
-        isUpdateInSameRow ? Promise.resolve() : tableRef.child(sourceField.row).set(updatedSourceRow),
-        tableRef.child(targetField.row).set(updatedTargetRow)
-    ]);
-}
-
-function collectRookMoves(selectedField, color, castling) {
-    if ((color == 'black' && selectedField.row == 1 && (selectedField.index == 1 || selectedField.index == 8)) ||
-        (color == 'white' && selectedField.row == 8 && (selectedField.index == 1 || selectedField.index == 8))) {
-        var rookMoves = _.toArray(castling[color].rookMoves),
-            alreadyAdded = rookMoves.filter(field => {
-                return field.row == selectedField.row && field.index == selectedField.index;
-            }).length;
-        if (!alreadyAdded) {
-            castlingRef.child(color + '/rookMoves').push(selectedField);
-        }
-    }
 }
 
 function isFigureSelection(selectedField, currentField) {
